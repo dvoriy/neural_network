@@ -1,16 +1,19 @@
-# This is a sample Python script.
+#Final Project TAU neural networks.
+#By Roy & Yossi D
+import pandas as pd
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def read_data_files(name):
+    test_dataset = pd.read_csv("ctr_dataset_test.csv")
+    train_dataset = pd.read_csv("ctr_dataset_train.csv")
+    pd.set_option('display.max_columns', 30)
+    pd.set_option('display.max_rows', 20)
 
+    print (test_dataset.head(10))
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+    print('Data files loaded successfully!')
+
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    read_data_files('self')
