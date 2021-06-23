@@ -2,23 +2,35 @@ import pandas as pd
 import random
 import matplotlib.pyplot as plt
 
-def plot_list(list):
+def plot_elbow(list):
     centers = []
     dots = []
-
     # plot
     for element in list:
         centers.append(element[0])
         dots.append(element[1])
-    result = dots + centers
 
-    plt.scatter(centers,dots,color='red')
+    plt.scatter(centers,dots)
+    plt.show()
+
+def plot_list(list):
+    x = []
+    y = []
+    i=0
+    for element in list:
+        for k in range (len(element)):
+            x.append(centers[i])
+            y.append(element[k])
+        i+=1
+
+    print (x,y)
+    plt.scatter(x,y,color='red')
     plt.show()
 
 
 def read_data_files(name):
-    return pd.read_csv("sample.csv")
-  # return pd.read_csv("Clustering.csv")
+    #return pd.read_csv("sample.csv")
+    return pd.read_csv("Clustering.csv")
 
 def update_centers(list):
     ans = 0.0
@@ -28,7 +40,7 @@ def update_centers(list):
         ans=sum(element)/len(element)
 
         new_centers.append(ans)
-    print (new_centers)
+  #  print (new_centers)
     return new_centers
 
 
@@ -37,10 +49,11 @@ def update_diff(list):
      new_centers = []
      i = 0
      for element in list:
-         ans += ((sum(element)-(centers[i]*len(element)))**2)/len(element)
+         for item in element:
+            ans += ((item-centers[i])**2)
          i+=1
 
-         print("this is the diff:", ans )
+    #     print("this is the diff:", ans )
          new_centers.append(ans)
      return (sum(new_centers)/len(new_centers))
 
@@ -67,7 +80,7 @@ def classify(dots_list):
                 #print (res)
        total.append(res)
 
-   #print (total)
+ #  print (total)
    return total
 
 def pick_start_points(num_of_centers, x_array):
@@ -80,16 +93,24 @@ if __name__ == '__main__':
     clustering_dataset = read_data_files('self')
     d_in_prog =  clustering_dataset['Machine.num.1']
     K=5
+    converged =[]
+    results = []
 
-    old_diff = 20000.0
-    new_diff = 10000.0
-    centers = pick_start_points(K, d_in_prog)
-    while old_diff - new_diff > 1 :
-        old_diff=new_diff
-        ans = classify(d_in_prog)
-        new_diff = update_diff(ans)
-        print (new_diff)
-        centers = update_centers(ans)
-
+    for i in range(3,30):
+      old_diff = 20000.0
+      new_diff = 10000.0
+      ans = []
+      centers = pick_start_points(i, d_in_prog)
+      while ans not in results:
+          old_diff=new_diff
+          if (ans):
+            results.append(ans)
+          ans = classify(d_in_prog)
+         # print (ans)
+          new_diff = update_diff(ans)
+          centers = update_centers(ans)
+      converged.append((i, new_diff))
+    print (converged)
     plot_list(ans)
+    plot_elbow(converged)
 
