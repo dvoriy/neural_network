@@ -13,6 +13,37 @@ def plot_elbow(list):
     plt.scatter(centers,dots)
     plt.show()
 
+
+def plot_list(list):
+    #data = list
+    x = []
+    y = []
+    color = []
+    colors = ("red", "green", "blue","yellow")
+
+    for element in list:
+        for k in range(len(element)):
+            x.append(element[k])
+            y.append(1)
+            color.append(colors[(list.index(element) % len(colors))])
+
+
+    for center in centers:
+        x.append(center)
+        y.append(1)
+        color.append("black")
+
+    print (x)
+    print (y)
+    print (color)
+
+    plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30)
+
+    plt.title('Matplot scatter plot')
+    plt.legend(loc=2)
+    plt.show()
+
+'''
 def plot_list(list):
     x = []
     y = []
@@ -26,7 +57,7 @@ def plot_list(list):
     print (x,y)
     plt.scatter(x,y,color='red')
     plt.show()
-
+'''
 
 def read_data_files(name):
     #return pd.read_csv("sample.csv")
@@ -96,7 +127,7 @@ if __name__ == '__main__':
     converged =[]
     results = []
 
-    for i in range(3,30):
+    for i in range(3,8):
       old_diff = 20000.0
       new_diff = 10000.0
       ans = []
