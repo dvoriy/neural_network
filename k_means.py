@@ -122,26 +122,27 @@ def pick_start_points(num_of_centers, x_array):
 if __name__ == '__main__':
     print("starting to read data files")
     clustering_dataset = read_data_files('self')
-    d_in_prog =  clustering_dataset['Machine.num.1']
-    K=5
-    converged =[]
-    results = []
+    for i in range(1, 10):
+        d_in_prog =  clustering_dataset['Machine.num.'+str(i)]
+        K=5
+        converged =[]
+        results = []
 
-    for i in range(3,8):
-      old_diff = 20000.0
-      new_diff = 10000.0
-      ans = []
-      centers = pick_start_points(i, d_in_prog)
-      while ans not in results:
-          old_diff=new_diff
-          if (ans):
-            results.append(ans)
-          ans = classify(d_in_prog)
-         # print (ans)
-          new_diff = update_diff(ans)
-          centers = update_centers(ans)
-      converged.append((i, new_diff))
-    print (converged)
-    plot_list(ans)
-    plot_elbow(converged)
+        for i in range(3,8):
+          old_diff = 20000.0
+          new_diff = 10000.0
+          ans = []
+          centers = pick_start_points(i, d_in_prog)
+          while ans not in results:
+              old_diff=new_diff
+              if (ans):
+                results.append(ans)
+              ans = classify(d_in_prog)
+             # print (ans)
+              new_diff = update_diff(ans)
+              centers = update_centers(ans)
+          converged.append((i, new_diff))
+        print (converged)
+        plot_list(ans)
+        plot_elbow(converged)
 

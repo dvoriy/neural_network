@@ -65,11 +65,12 @@ def plot_list(list):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     clusters = []
-    epsilon = 1.0
+    epsilon = 0.70
     min_pts = 300.0
     visited = []
     dataframe = read_data_files('self')
-    dataset = dataframe['Machine.num.3']
-
-    recursive_dbscan(dataset)
-    plot_list(clusters)
+    for i in range (1,10):
+       #openset = print("Machine.num.%d"%i)
+        dataset = dataframe['Machine.num.'+str(i)]
+        recursive_dbscan(dataset)
+        plot_list(clusters)
