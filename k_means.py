@@ -14,7 +14,7 @@ def plot_elbow(list):
     plt.show()
 
 
-def plot_list(list):
+def plot_list(list, mid_points):
     #data = list
     x = []
     y = []
@@ -28,19 +28,15 @@ def plot_list(list):
             color.append(colors[(list.index(element) % len(colors))])
 
 
-    for center in centers:
+    for center in mid_points:
         x.append(center)
         y.append(1)
         color.append("black")
 
-    print (x)
-    print (y)
-    print (color)
 
     plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30)
 
     plt.title('Matplot scatter plot')
-    plt.legend(loc=2)
     plt.show()
 
 
@@ -109,25 +105,33 @@ if __name__ == '__main__':
     clustering_dataset = read_data_files('self')
     for i in range(1, 10):
         d_in_prog =  clustering_dataset['Machine.num.'+str(i)]
-        K=5
+        K=17
         converged =[]
         results = []
+        clusters = []
+        mid_points = []
 
-        for i in range(3,8):
+        for i in range(1,K):
           old_diff = 20000.0
           new_diff = 10000.0
           ans = []
           centers = pick_start_points(i, d_in_prog)
-          while ans not in results:
+          while ans not in clusters:
               old_diff=new_diff
               if (ans):
-                results.append(ans)
+                clusters.append(ans)
               ans = classify(d_in_prog)
              # print (ans)
               new_diff = update_diff(ans)
               centers = update_centers(ans)
           converged.append((i, new_diff))
-        print (converged)
-        plot_list(ans)
+          results.append(ans)
+          mid_points.append(centers)
+        #print (converged)
+
+        for i in range(K):
+            if (converged[i][1]/converged[i+1][1] < 2):
+                plot_list(results[i], mid_points[i])
+                break
         plot_elbow(converged)
 

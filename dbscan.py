@@ -3,14 +3,13 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-flatten = lambda x: [i for row in x for i in row]
+#flatten = lambda x: [i for row in x for i in row]
 
 def read_data_files(name):
     return pd.read_csv("Clustering.csv")
 
 def is_core(element, list):
     return (len(find_neighbors(element, list)) > min_pts)
-
 
 def find_neighbors(element, list):
     neighbors = []
@@ -46,7 +45,7 @@ def plot_list(list):
     y = []
     color = []
     colors = ("red", "green", "blue","yellow")
-    groups = ("coffee", "tea", "water","blood")
+
 
     # Create plot
     for cluster in list:
@@ -55,22 +54,21 @@ def plot_list(list):
             y.append(1)
             color.append (colors[(list.index(cluster) % len(colors))])
 
-    plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30, label=groups)
+    plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30)
 
     plt.title('DBSCAN scatter plot')
-    plt.legend(loc=2)
     plt.show()
 
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    clusters = []
-    epsilon = 0.70
+    epsilon = 1.70
     min_pts = 300.0
-    visited = []
     dataframe = read_data_files('self')
     for i in range (1,10):
-       #openset = print("Machine.num.%d"%i)
+        clusters = []
+        visited = []
         dataset = dataframe['Machine.num.'+str(i)]
         recursive_dbscan(dataset)
         plot_list(clusters)
+
