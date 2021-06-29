@@ -43,21 +43,6 @@ def plot_list(list):
     plt.legend(loc=2)
     plt.show()
 
-'''
-def plot_list(list):
-    x = []
-    y = []
-    i=0
-    for element in list:
-        for k in range (len(element)):
-            x.append(centers[i])
-            y.append(element[k])
-        i+=1
-
-    print (x,y)
-    plt.scatter(x,y,color='red')
-    plt.show()
-'''
 
 def read_data_files(name):
     #return pd.read_csv("sample.csv")
