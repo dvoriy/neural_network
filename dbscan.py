@@ -30,13 +30,11 @@ def silhuette_width(list):
                         min_dist_out_of_cluster = abs(element - point)
 
             b.append(min_dist_out_of_cluster)
-    print (a)
-    print (b)
-    S = list(map(operator.sub, b, a))
-    M = list(map(operator.max, b, a))
-    s = list(map(operator.div, S, M))
-    print (s)
 
+    for val in map(operator.truediv, map(operator.sub, b, a), map(max, b, a)):
+        S.append(val)
+
+    print (S)
 
 def read_data_files(name):
     #return pd.read_csv("sample.csv")
