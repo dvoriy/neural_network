@@ -15,11 +15,10 @@ def silhuette_width(list):
     a = []
     b = []
     S = []
-    s = []
-    M = []
+
     for cluster in list:
         for point in cluster:
-            a.append(sum(cluster) - len(cluster)*point)
+            a.append(abs((sum(cluster) - len(cluster)*point)))
           #  print (a)
             min_dist_out_of_cluster=100000.0
             for neighbor_cluster in list:
@@ -34,7 +33,13 @@ def silhuette_width(list):
     for val in map(operator.truediv, map(operator.sub, b, a), map(max, b, a)):
         S.append(val)
 
-    print (S)
+    if len(list) == 1:
+        return 0
+    if list:
+        print (sum(S)/len(S))
+        return (sum(S)/len(S))
+    else:
+        return -1
 
 def read_data_files(name):
     #return pd.read_csv("sample.csv")
@@ -152,34 +157,38 @@ def plot_list(list):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    epsilon = 2.5
-    min_pts = 600.0
+    epsilon = 1
+    min_pts = 50.0
     sys.setrecursionlimit(10 ** 6)
+    s_w = -1.0
 
 
     dataframe = read_data_files('self')
     for i in range (1,10):
-        clusters = []
-        visited = []
-        core = []
-        index = {}
-        dataset = dataframe['Machine.num.'+str(i)]
+        to_continue = True
+        while to_continue:
+            clusters = []
+            visited = []
+            core = []
+            index = {}
+            dataset = dataframe['Machine.num.'+str(i)]
 
-        ts = time.time()
-        scanner(dataset)
-        align_clusters(index)
-        ts1 = time.time()
-        centers = update_centers(clusters)
-        print (centers)
-        print (update_diff(clusters,centers))
-        silhuette_width(clusters)
-        plot_list(clusters)
-        #print (ts1-ts)
-      #  print (len(clusters))
-    #    clusters = []
-    #    ts2 = time.time()
-   #     recursive_dbscan(dataset)
-    #    ts3 = time.time()
-    #    plot_list(clusters)
-    #    print (ts3-ts2)
+            ts = time.time()
+            scanner(dataset)
+            align_clusters(index)
+            ts1 = time.time()
+     #       centers = update_centers(clusters)
+     #       print (centers)
+     #       print (update_diff(clusters,centers))
+            s_w_temp = silhuette_width(clusters)
+            if s_w_temp < s_w:
+                to_continue = False
+            else:
+                if s_w == s_w_temp:
+                    break
+                s_w = s_w_temp
+                epsilon *= 2
+                min_pts *= 2
+            plot_list(clusters)
+
 
