@@ -56,7 +56,7 @@ def update_centers(list):
     return new_centers
 
 
-def update_diff(list):
+def update_diff(list,centers):
      ans = 0.0
      new_centers = []
      i = 0
@@ -122,8 +122,8 @@ if __name__ == '__main__':
                 clusters.append(ans)
               ans = classify(d_in_prog)
              # print (ans)
-              new_diff = update_diff(ans)
               centers = update_centers(ans)
+              new_diff = update_diff(ans,centers)
           converged.append((i, new_diff))
           results.append(ans)
           mid_points.append(centers)
