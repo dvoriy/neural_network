@@ -11,11 +11,11 @@ def plot_elbow(list):
         dots.append(element[1])
 
     plt.scatter(centers,dots)
+    plt.title('K-Means convergence plot')
     plt.show()
 
 
 def plot_list(list, mid_points):
-    #data = list
     x = []
     y = []
     color = []
@@ -36,12 +36,11 @@ def plot_list(list, mid_points):
 
     plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30)
 
-    plt.title('Matplot scatter plot')
+    plt.title('K-Means Scatter plot')
     plt.show()
 
 
 def read_data_files(name):
-    #return pd.read_csv("sample.csv")
     return pd.read_csv("Clustering.csv")
 
 def update_centers(list):
