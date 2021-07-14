@@ -15,6 +15,9 @@ train_dataset = pd.read_csv("ctr_dataset_train.csv")
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
 print(train_dataset.head(10))
+train_dataset['Gender'].replace("F", 1, inplace=True)# replace F to 1
+train_dataset['Gender'].replace("M", 0, inplace=True)# replace M to 0
+print(train_dataset.head(10))
 print(train_dataset["Buy_premium"].value_counts()) # prints the number of from each unique value
 print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
@@ -25,7 +28,8 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median()) # shows median
 
-train_dataset = train_dataset.drop(columns="User_ID")
+train_dataset = train_dataset.drop(columns="User_ID") #dropping the user_Id columns
+train_dataset = train_dataset.drop(columns="Unnamed: 0") #dropping the Unnamed: 0 columns
 correlation_matrix = train_dataset.corr() # creating correlation_matrix
 print(correlation_matrix)
 dataplot=sb.heatmap(correlation_matrix) # creating a heat map of the correlation_matrix
