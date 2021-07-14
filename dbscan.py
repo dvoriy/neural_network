@@ -16,7 +16,9 @@ def silhuette_width(list):
     b = []
     S = []
 
+    print ( "List length:" + str(len(list)))
     for cluster in list:
+        print ("cluster length:" + str(len(cluster)))
         for point in cluster:
             a.append(abs((sum(cluster) - len(cluster)*point)))
           #  print (a)
@@ -69,8 +71,6 @@ def density_connected(element,k,list):
 
 
 
-
-
 def scanner(list):
     noise = []
     for element in list:
@@ -83,30 +83,29 @@ def scanner(list):
             k = k+1
             index.update({element : k})
             density_connected(element,k,list)
-  #  print(index)
 
-
-
-
+def add_neighbors_to_core(element,core,list):
+    neighbors = []
+    visited.append(element)
+    if is_core(element, list):
+        core.append(element)
+        neighbors.extend(find_neighbors(element, list))
+        for neighbor in neighbors:
+            if neighbor in visited:
+                continue
+            add_neighbors_to_core(neighbor, core, list)
 
 
 def recursive_dbscan(list):
+
     for element in list:
         core = []
-        neighbors = []
         if element in visited:
             continue
-        visited.append(element)
-        if is_core(element, list):
-            core.append(element)
-            neighbors.extend(find_neighbors(element,list))
-            for neighbor in neighbors:
-                visited.append(neighbor)
-                core.append(neighbor)
-
-
+        add_neighbors_to_core(element, core, list)
+        if (core):
             clusters.append(core)
-            core = []
+
 
 def align_clusters(index):
     cluster = []
@@ -157,15 +156,17 @@ def plot_list(list):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    epsilon = 1
-    min_pts = 50.0
+
     sys.setrecursionlimit(10 ** 6)
-    s_w = -1.0
+
 
 
     dataframe = read_data_files('self')
     for i in range (1,10):
         to_continue = True
+        epsilon = 0.2
+        min_pts = 20.0
+        s_w = -1.0
         while to_continue:
             clusters = []
             visited = []
@@ -174,9 +175,10 @@ if __name__ == '__main__':
             dataset = dataframe['Machine.num.'+str(i)]
 
             ts = time.time()
-            scanner(dataset)
-            align_clusters(index)
-            ts1 = time.time()
+            recursive_dbscan (dataset)
+          #  scanner(dataset)
+          #  align_clusters(index)
+            #ts1 = time.time()
      #       centers = update_centers(clusters)
      #       print (centers)
      #       print (update_diff(clusters,centers))
@@ -187,8 +189,11 @@ if __name__ == '__main__':
                 if s_w == s_w_temp:
                     break
                 s_w = s_w_temp
-                epsilon *= 2
-                min_pts *= 2
+               # epsilon *= 2
+           #     min_pts /= 2
+                print (epsilon)
+                print (min_pts)
+
             plot_list(clusters)
 
 
