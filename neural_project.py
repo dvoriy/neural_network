@@ -19,17 +19,25 @@ train_dataset['Gender'].replace("F", 1, inplace=True)# replace F to 1
 train_dataset['Gender'].replace("M", 0, inplace=True)# replace M to 0
 print(train_dataset.head(10))
 print(train_dataset["Buy_premium"].value_counts()) # prints the number of from each unique value
+print(train_dataset["Gender"].value_counts()) # prints the number of from each unique value
+print(train_dataset["Location"].value_counts()) # prints the number of from each unique value
+
 print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-               "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe()) # show the dataset 5 statistics
+               "Color_variations", "Dispatch_loc", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
 print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-               "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median()) # shows median
+               "Color_variations", "Dispatch_loc", "Buy_premium"]].median()) # shows median
+print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+               "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+               "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+               "Color_variations", "Dispatch_loc", "Buy_premium"]].mode()) # shows mode
 
 train_dataset = train_dataset.drop(columns="User_ID") #dropping the user_Id columns
 train_dataset = train_dataset.drop(columns="Unnamed: 0") #dropping the Unnamed: 0 columns
+train_dataset = train_dataset.drop(columns="Bought_premium") #dropping the Bought_premium columns
 correlation_matrix = train_dataset.corr() # creating correlation_matrix
 print(correlation_matrix)
 dataplot=sb.heatmap(correlation_matrix) # creating a heat map of the correlation_matrix
@@ -45,4 +53,4 @@ unique_corr_pairs = upper_corr_mat.unstack().dropna()
 # Sort correlation pairs
 sorted_mat1 = unique_corr_pairs.sort_values()
 print(sorted_mat1)
-print("hi")
+
