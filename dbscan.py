@@ -10,7 +10,6 @@ from k_means import  update_diff
 
 centers = []
 
-
 def silhuette_width(list):
     a = []
     b = []
@@ -20,23 +19,24 @@ def silhuette_width(list):
     for cluster in list:
         print ("cluster length:" + str(len(cluster)))
         for point in cluster:
-            a.append(abs((sum(cluster) - len(cluster)*point)))
-          #  print (a)
+            a.append(abs((sum(cluster) - len(cluster)*point)/len(cluster)-1))
+
             min_dist_out_of_cluster=100000.0
             for neighbor_cluster in list:
                 if neighbor_cluster == cluster:
                     continue
                 for element in neighbor_cluster:
-                    if abs(element - point) < min_dist_out_of_cluster:
-                        min_dist_out_of_cluster = abs(element - point)
+                    cur_min=(abs(element - point)/len(neighbor_cluster))
+                    if  cur_min < min_dist_out_of_cluster:
+                        min_dist_out_of_cluster = cur_min
 
             b.append(min_dist_out_of_cluster)
 
+    print(a)
+    print(b)
     for val in map(operator.truediv, map(operator.sub, b, a), map(max, b, a)):
         S.append(val)
-
-    if len(list) == 1:
-        return 0
+    print (S)
     if list:
         print (sum(S)/len(S))
         return (sum(S)/len(S))
@@ -85,11 +85,10 @@ def scanner(list):
             density_connected(element,k,list)
 
 def add_neighbors_to_core(element,core,list):
-    neighbors = []
     visited.append(element)
-    if is_core(element, list):
+    neighbors = find_neighbors(element, list)
+    if len(neighbors) > min_pts:
         core.append(element)
-        neighbors.extend(find_neighbors(element, list))
         for neighbor in neighbors:
             if neighbor in visited:
                 continue
@@ -142,10 +141,11 @@ def plot_list(list):
 
     # Create plot
     for cluster in list:
+        cur_color = colors[(list.index(cluster) % len(colors))]
         for element in cluster:
             x.append(element)
             y.append(1)
-            color.append (colors[(list.index(cluster) % len(colors))])
+            color.append (cur_color)
 
 
     plt.scatter(x, y, alpha=0.8, c=color, edgecolors='none', s=30)
@@ -159,13 +159,11 @@ if __name__ == '__main__':
 
     sys.setrecursionlimit(10 ** 6)
 
-
-
     dataframe = read_data_files('self')
     for i in range (1,10):
         to_continue = True
-        epsilon = 0.2
-        min_pts = 20.0
+        epsilon = 0.3
+        min_pts = 128.0
         s_w = -1.0
         while to_continue:
             clusters = []
@@ -183,16 +181,20 @@ if __name__ == '__main__':
      #       print (centers)
      #       print (update_diff(clusters,centers))
             s_w_temp = silhuette_width(clusters)
+            print("s_w_temp is " + str(s_w_temp))
             if s_w_temp < s_w:
                 to_continue = False
             else:
                 if s_w == s_w_temp:
-                    break
+                    if s_w > -1:
+                        break
                 s_w = s_w_temp
                # epsilon *= 2
-           #     min_pts /= 2
-                print (epsilon)
-                print (min_pts)
+                min_pts /= 2
+                print ("s_w is "+ str(s_w))
+                print ("index is " +str(i))
+                print ("epsilon is " +str(epsilon))
+                print ("min_pts is " +str(min_pts))
 
             plot_list(clusters)
 
