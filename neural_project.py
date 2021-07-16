@@ -28,8 +28,11 @@ from sklearn.impute import SimpleImputer
 # 18. train model
 # 19. explainable AI
 # 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
+# 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
+# small medium and big than we will get 3 columns: small medium and big.
+# in the small column there will be a 1 where the row was small and zero if it was medium or big.
 
-#done
+#done:
 # 1. split the data: train 70%; validation 15%; test 10%
 # 2. determine which col if any have to many NA values and therefore are unnecessary
 #    meaning that that we leave a feature outside
