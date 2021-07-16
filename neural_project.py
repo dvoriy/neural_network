@@ -14,13 +14,7 @@ from sklearn.impute import SimpleImputer
 
 # to do list:
 # 1. split the data: train 70%; validation 15%; test 10%
-# 2. determine which col if any have to many NA values and therefore are unnecessary
-#    meaning that that we leave a feature outside
-#    create a function
-# 3. determine which rows if any have to many NA values and therefore are unnecessary
-#    meaning that that we leave an client outside
-#    create a function
-# 4. determine how to handle NA values and write a function
+
 # 5. clean the data - look for negative values etc and decided what to do
 # 6. make sure that i have at least 5 summery statistics for each feature
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
@@ -31,9 +25,17 @@ from sklearn.impute import SimpleImputer
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features ae more important
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
-# 14. integrate mode and median
+# 14. integrate mode and median ine the summery
 # 15. determine buy_premium as target variable
-# 16. buy_premium has NA values handle it - consider to just throw them out
+
+#done
+# 2. determine which col if any have to many NA values and therefore are unnecessary
+#    meaning that that we leave a feature outside
+#    create a function
+# 3. determine which rows if any have to many NA values and therefore are unnecessary
+#    meaning that that we leave an client outside
+#    create a function
+# 4. determine how to handle NA values and write a function
 
 def date_loading(path):
     """loads the data need to get a path"""
@@ -126,6 +128,7 @@ pd.set_option('display.max_rows', 500)
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
 # בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
+# לאחר שנריץ חשיבות משתנים נוכל להחליט להוריד למשל שורות שאין להן את המשתנים החשובים ביותר
 
 # fill NA
 # missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
