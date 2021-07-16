@@ -17,15 +17,14 @@ from sklearn.impute import SimpleImputer
 # 6. we need to add one summery statistic to non-numeric variables
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
-# 8. create from the timestamp feature i.e. year, month, day of the week
 # 9. create from the time feature a morning noon evening night feature
 # 10. normalize the data
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features ae more important
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
-# 14. integrate mode and median ine the summery
 # 15. determine buy_premium as target variable
 # 16. do we want to turn bought premium to numric and also other variables in order to see better correltion?
+# 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
 
 #done
 # 2. determine which col if any have to many NA values and therefore are unnecessary
@@ -36,6 +35,8 @@ from sklearn.impute import SimpleImputer
 #    create a function
 # 4. determine how to handle NA values and write a function
 # 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
+# 8. create from the timestamp feature i.e. year, month, day of the week
+# 14. integrate mode and median in the summery
 
 def date_loading(path):
     """loads the data need to get a path"""
@@ -194,6 +195,12 @@ print(len(train_dataset.index)-len(new_train_dataset.index))
 # print(missing_values_count_new)
 
 
-
+# feature engineering
+# Date
+train_dataset['Date']= pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to tpe datetime
+train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
+# print( train_dataset["day"])
+train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
+# print( train_dataset["month"])
 
 
