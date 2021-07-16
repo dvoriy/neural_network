@@ -4,6 +4,8 @@ import pandas as pd
 import seaborn as sb
 import matplotlib.pyplot as mp
 import numpy as np
+from sklearn.impute import SimpleImputer
+
 
 
 # import pandas_profiling as pp # a libery that helps explore the data
@@ -31,7 +33,7 @@ import numpy as np
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median
 # 15. determine buy_premium as target variable
-# 16. buy_premium has NA values handle it
+# 16. buy_premium has NA values handle it - consider to just throw them out
 
 def date_loading(path):
     """loads the data need to get a path"""
@@ -41,7 +43,7 @@ def date_loading(path):
 
 def feature_engineering(data):
     """receives the project data and cleans the data"""
-    data['Gender'].replace("F", 1, inplace=True)  # replace F to 1
+    data['Gender'].replace("F", 1, inplace=True)  # replace F to 1 # explain why
     data['Gender'].replace("M", 0, inplace=True)  # replace M to 0 # unsure if needed can it work with m and f?
     print(train_dataset.head(10))  # in order to verify
 
@@ -114,15 +116,55 @@ pd.set_option('display.max_rows', 500)
 # print(train_dataset.head(10))
 # print(how_many_na_col(train_dataset))
 # print(how_many_na_col_percentage(train_dataset))
+
+# NA handling
+# ניסתי להשתמש בשיטה של IMPUTEולהחליף את הערכים בחציון הבעיה היא שאי אפשר להשתמש בחציון על ערכים קטגוריאלים
+# בנוסף שנסיתי להשתמש בהכי נפוץ שעובד על ערכים קטגוראליים לא הצלחתי להשתמש בנתונים נתן שגיאה
+# לכן בנתיים השתמשתי בפונקצייה FILLNA שפשוט מללאת את ה NA בערך הקודם או ההבא
+# קריטי לתקן את זה אחרת נקבל תוצאות לא טובות
+# הכי טוב להשתמש ב KNN
+# Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
+# יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
+# בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
+
+# fill NA
+# missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+# print(missing_values_count)
+# train_dataset_filled = train_dataset.fillna(method="ffill")# fill the NA with the priveous value
+# train_dataset_filled = train_dataset_filled.fillna(method="backfill")# fill the NA with the next value
+# missing_values_count1 = (train_dataset_filled .isnull().sum() * 100 / len(train_dataset_filled ))
+# print(missing_values_count1)
+
+# dropping col or rows
+# new_train_dataset = train_dataset.dropna(axis=0, thresh=10)  # axis=0 means rows (1 means columns)
+# thresh=10 means that if we have at least 10 non Na values we keep the row can also use subset=["colname1",
+# "colname2"] - tells where to check for an valuse - after correlation and information gain we can decide
+# feature_engineering(train_dataset)
+
+# הורדה של שורות שאין להן משתנה מטרה 2608
+# print(len(train_dataset.index))
+# new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"]) # throws out all the rows with
+# # NA at the target variable
+# print(len(new_train_dataset.index))
+# print(len(train_dataset.index)-len(new_train_dataset.index))
+
+#imputaion
+# my_imputer = SimpleImputer(strategy="most_frequent") # we crates an imputer - this object will imput (replace missing values
+# # with other values) we chose strategy="most_frequent" but we can choose others as well
+# # If “mean”, then replace missing values using the mean along each column. Can only be used with numeric data.
+# # If “median”, then replace missing values using the median along each column. Can only be used with numeric data.
+# # If “most_frequent”, then replace missing using the most frequent value along each column. Can be used with strings or numeric data. If there is more than one such value, only the smallest is returned.
+# # If “constant”, then replace missing values with fill_value. Can be used with strings or numeric data.
+# data_with_imputed_values = my_imputer.fit_transform(train_dataset)
+# missing_values_count_new = (data_with_imputed_values.isnull().sum() * 100 / len(data_with_imputed_values))
+# print(missing_values_count_new)
+
+
 # print_data_unique_values(train_dataset)
 # print_data_summaries(train_dataset)
 # plot_cor_matrix(train_dataset)
-print(len(train_dataset.index))
-new_train_dataset = train_dataset.dropna(axis=0, thresh=10)  # axis=0 means rows (1 means columns)
-# thresh=10 means that if we have at least 10 non Na values we keep the row can also use subset=["colname1",
-# "colname2"] - tells where to check for an valuse - after correlation and informarion gain we can decide
-# feature_engineering(train_dataset)
-print(len(new_train_dataset.index))
+# print(len(train_dataset.index))
+
 
 
 
@@ -139,3 +181,4 @@ print(len(new_train_dataset.index))
 # "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Buy_premium"]].mode()) # shows mode
+
