@@ -14,7 +14,6 @@ from sklearn.impute import SimpleImputer
 # profile_report.to_file("output.html")
 
 # to do list:
-# 1. split the data: train 70%; validation 15%; test 10%
 # 6. we need to add one summery statistic to non-numeric variables
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
@@ -28,8 +27,10 @@ from sklearn.impute import SimpleImputer
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
 # 18. train model
 # 19. explainable AI
+# 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
 
 #done
+# 1. split the data: train 70%; validation 15%; test 10%
 # 2. determine which col if any have to many NA values and therefore are unnecessary
 #    meaning that that we leave a feature outside
 #    create a function
@@ -124,16 +125,14 @@ train_dataset[train_dataset['Idle'] < 0] = 0
 train_dataset[train_dataset['Post_premium_commercial'] < 0] = 0
 # print_data_summaries(train_dataset)
 
-# NA handling
+####### NA handling #######
 print(len(train_dataset.index)) # number of lines in the data
 print(how_many_na_col(train_dataset)) # number of na in each col
 print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
 
-# ניסתי להשתמש בשיטה של IMPUTEולהחליף את הערכים בחציון הבעיה היא שאי אפשר להשתמש בחציון על ערכים קטגוריאלים
-# בנוסף שנסיתי להשתמש בהכי נפוץ שעובד על ערכים קטגוראליים לא הצלחתי להשתמש בנתונים נתן שגיאה
-# לכן בנתיים השתמשתי בפונקצייה FILLNA שפשוט מללאת את ה NA בערך הקודם או ההבא
-# קריטי לתקן את זה אחרת נקבל תוצאות לא טובות
-# הכי טוב להשתמש ב KNN
+
+# כדי להשלים נתונים חסרים הכי טוב להשתמש ב KNN
+# עמודה עם יותר מ-60% ערכים חסירם היא מיותרת
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
 # בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
@@ -161,21 +160,38 @@ new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"
 print(len(new_train_dataset.index))
 print(len(train_dataset.index)-len(new_train_dataset.index))
 
-#imputaion
-# my_imputer = SimpleImputer(strategy="most_frequent") # we crates an imputer - this object will imput (replace missing values
-# # with other values) we chose strategy="most_frequent" but we can choose others as well
-# # If “mean”, then replace missing values using the mean along each column. Can only be used with numeric data.
-# # If “median”, then replace missing values using the median along each column. Can only be used with numeric data.
-# # If “most_frequent”, then replace missing using the most frequent value along each column. Can be used with strings or numeric data. If there is more than one such value, only the smallest is returned.
-# # If “constant”, then replace missing values with fill_value. Can be used with strings or numeric data.
-# data_with_imputed_values = my_imputer.fit_transform(train_dataset)
-# missing_values_count_new = (data_with_imputed_values.isnull().sum() * 100 / len(data_with_imputed_values))
-# print(missing_values_count_new)
+# impute categorical data with mode
+train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)
+train_dataset['Location'].fillna(train_dataset['Location'].mode()[0], inplace=True)
+train_dataset['Mouse_activity_1'].fillna(train_dataset['Mouse_activity_1'].mode()[0], inplace=True)
+train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True)
+train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True)
+train_dataset['Mouse_activity_2'].fillna(train_dataset['Mouse_activity_2'].mode()[0], inplace=True)
+train_dataset['Mouse_activity_3'].fillna(train_dataset['Mouse_activity_3'].mode()[0], inplace=True)
+train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True)
+train_dataset['Bought_premium'].fillna(train_dataset['Bought_premium'].mode()[0], inplace=True)
+
+# impute numeric data with median
+train_dataset['Min_prod_time'].fillna(train_dataset['Min_prod_time'].median(), inplace=True)
+train_dataset['Max_prod_time'].fillna(train_dataset['Max_prod_time'].median(), inplace=True)
+train_dataset['Commercial_1'].fillna(train_dataset['Commercial_1'].median(), inplace=True)
+train_dataset['Commercial_2'].fillna(train_dataset['Commercial_2'].median(), inplace=True)
+train_dataset['Commercial_3'].fillna(train_dataset['Commercial_3'].median(), inplace=True)
+train_dataset['Jewelry'].fillna(train_dataset['Jewelry'].median(), inplace=True)
+train_dataset['Shoes'].fillna(train_dataset['Shoes'].median(), inplace=True)
+train_dataset['Clothing'].fillna(train_dataset['Clothing'].median(), inplace=True)
+train_dataset['Premium'].fillna(train_dataset['Premium'].median(), inplace=True)
+train_dataset['Idle'].fillna(train_dataset['Idle'].median(), inplace=True)
+train_dataset['Post_premium_commercial'].fillna(train_dataset['Post_premium_commercial'].median(), inplace=True)
+train_dataset['Premium_commercial_play'].fillna(train_dataset['Premium_commercial_play'].median(), inplace=True)
+train_dataset['Size_variations'].fillna(train_dataset['Size_variations'].median(), inplace=True)
+train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].median(), inplace=True)
+
 
 
 ######## feature engineering #########
 # Date
-train_dataset['Date']= pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to tpe datetime
+train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to tpe datetime
 train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
 # print( train_dataset["day"])
 train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
@@ -189,9 +205,9 @@ train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), 
 
 # soci economical
 
-# creating target variable
-
 # random forest information gain
+# should probably do also before imputing the data and check if there is any different results and also after
+# a lot of things can affect the importance
 
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
