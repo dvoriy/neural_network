@@ -14,8 +14,8 @@ from sklearn.impute import SimpleImputer
 
 # to do list:
 # 1. split the data: train 70%; validation 15%; test 10%
-# 5. clean the data - look for negative values etc and decided what to do
-# 6. we need to add ine summery statistic to non-numeric variables
+# 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
+# 6. we need to add one summery statistic to non-numeric variables
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
 # 8. create from the timestamp feature i.e. year, month, day of the week
@@ -140,8 +140,10 @@ train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id co
 train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
 # 0 correlation with all of the features, it seems that it comes from the csv numbering
 
-
-
+# Fixing negative valuse - we assume that the negative values represent people who didn't Post_premium_commercial
+train_dataset[train_dataset['Idle'] < 0] = 0
+train_dataset[train_dataset['Post_premium_commercial'] < 0] = 0
+# print_data_summaries(train_dataset)
 
 # NA handling
 print(len(train_dataset.index)) # number of lines in the data
@@ -174,11 +176,11 @@ print(missing_values_count1)
 # feature_engineering(train_dataset)
 
 # הורדה של שורות שאין להן משתנה מטרה 2608
-# print(len(train_dataset.index))
-# new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"]) # throws out all the rows with
-# # NA at the target variable
-# print(len(new_train_dataset.index))
-# print(len(train_dataset.index)-len(new_train_dataset.index))
+print(len(train_dataset.index))
+new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"]) # throws out all the rows with
+# NA at the target variable
+print(len(new_train_dataset.index))
+print(len(train_dataset.index)-len(new_train_dataset.index))
 
 #imputaion
 # my_imputer = SimpleImputer(strategy="most_frequent") # we crates an imputer - this object will imput (replace missing values
