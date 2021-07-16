@@ -14,7 +14,6 @@ from sklearn.impute import SimpleImputer
 
 # to do list:
 # 1. split the data: train 70%; validation 15%; test 10%
-# 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 # 6. we need to add one summery statistic to non-numeric variables
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
@@ -36,6 +35,7 @@ from sklearn.impute import SimpleImputer
 #    meaning that that we leave an client outside
 #    create a function
 # 4. determine how to handle NA values and write a function
+# 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 
 def date_loading(path):
     """loads the data need to get a path"""
