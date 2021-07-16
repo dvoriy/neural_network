@@ -14,9 +14,8 @@ from sklearn.impute import SimpleImputer
 
 # to do list:
 # 1. split the data: train 70%; validation 15%; test 10%
-
 # 5. clean the data - look for negative values etc and decided what to do
-# 6. make sure that i have at least 5 summery statistics for each feature
+# 6. we need to add ine summery statistic to non-numeric variables
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
 # 8. create from the timestamp feature i.e. year, month, day of the week
@@ -27,6 +26,7 @@ from sklearn.impute import SimpleImputer
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median ine the summery
 # 15. determine buy_premium as target variable
+# 16. do we want to turn bought premium to numric and also other variables in order to see better correltion?
 
 #done
 # 2. determine which col if any have to many NA values and therefore are unnecessary
@@ -43,23 +43,21 @@ def date_loading(path):
 
 # def data_splitting(data):
 
-def feature_engineering(data):
-    """receives the project data and cleans the data"""
-    data['Gender'].replace("F", 1, inplace=True)  # replace F to 1 # explain why
-    data['Gender'].replace("M", 0, inplace=True)  # replace M to 0 # unsure if needed can it work with m and f?
-    print(train_dataset.head(10))  # in order to verify
+# def feature_engineering(data):
+#     """receives the project data and cleans the data"""
+#     data['Gender'].replace("F", 1, inplace=True)  # replace F to 1 # explain why
+#     data['Gender'].replace("M", 0, inplace=True)  # replace M to 0 # unsure if needed can it work with m and f?
+#     print(train_dataset.head(10))  # in order to verify
 
 
-def drop_unneeded_columns(data):
-    """drop unneeded columns(features): user_Id, Unnamed: 0, ought_premium"""
-    data = data.drop(
-        columns="User_ID")  # dropping the user_Id column. 0 correlation with all of the features and has no meaning.
-    data = data.drop(
-        columns="Unnamed: 0")  # dropping the Unnamed: 0 column. 0 correlation with all of the features, it seems that it comes from the csv numbering
-    data = data.drop(
-        columns="Bought_premium")  # dropping the Bought_premium column there is no need for him the same as Buy_premium
-
-    print(train_dataset.head(10))  # in order to verify
+# def drop_unneeded_columns(data):
+#     """drop unneeded columns(features): user_Id, Unnamed: 0, ought_premium"""
+#     data = data.drop(columns="User_ID")  # dropping the user_Id column.
+#     # 0 correlation with all of the features and has no meaning.
+#     data = data.drop(columns="Unnamed: 0")  #
+#     # 0 correlation with all of the features, it seems that it comes from the csv numbering
+#
+#     print(train_dataset.head(10))  # in order to verify
 
 
 # functions to describe the data
@@ -112,14 +110,44 @@ def how_many_na_col_percentage(data):
 # if __name__ == '__main__':
 
 
-train_dataset = pd.read_csv("ctr_dataset_train.csv")
+train_dataset = pd.read_csv("ctr_dataset_train.csv") # loading the data
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
-# print(train_dataset.head(10))
-# print(how_many_na_col(train_dataset))
-# print(how_many_na_col_percentage(train_dataset))
+
+# Data Exploration
+print(train_dataset.head(10)) # print the first 10 rows
+print_data_unique_values(train_dataset) # prints the unique values in each col and counts them
+print_data_summaries(train_dataset)# prints the data summaries
+
+# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+#                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+#                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+#                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
+print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median()) # shows median
+# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+# "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
+
+plot_cor_matrix(train_dataset)# creating cor mat for only the  numeric and undropped variables.
+# non numeric variables which have no hierarchy - most of the time won't give us meaningful information
+# do we want to create cor matrix with the non numeric data????? using hierarchy?
+train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
+# 0 correlation with all of the features and has no meaning.
+train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
+# 0 correlation with all of the features, it seems that it comes from the csv numbering
+
+
+
 
 # NA handling
+print(len(train_dataset.index)) # number of lines in the data
+print(how_many_na_col(train_dataset)) # number of na in each col
+print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
+
 # ניסתי להשתמש בשיטה של IMPUTEולהחליף את הערכים בחציון הבעיה היא שאי אפשר להשתמש בחציון על ערכים קטגוריאלים
 # בנוסף שנסיתי להשתמש בהכי נפוץ שעובד על ערכים קטגוראליים לא הצלחתי להשתמש בנתונים נתן שגיאה
 # לכן בנתיים השתמשתי בפונקצייה FILLNA שפשוט מללאת את ה NA בערך הקודם או ההבא
@@ -129,14 +157,15 @@ pd.set_option('display.max_rows', 500)
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
 # בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
 # לאחר שנריץ חשיבות משתנים נוכל להחליט להוריד למשל שורות שאין להן את המשתנים החשובים ביותר
+# אולי צריך להפריד את הנתונים לנומרי ולא נומרי ואז לבצע את השינוי ולאחר מכן לחבר
 
 # fill NA
-# missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
-# print(missing_values_count)
-# train_dataset_filled = train_dataset.fillna(method="ffill")# fill the NA with the priveous value
-# train_dataset_filled = train_dataset_filled.fillna(method="backfill")# fill the NA with the next value
-# missing_values_count1 = (train_dataset_filled .isnull().sum() * 100 / len(train_dataset_filled ))
-# print(missing_values_count1)
+missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+print(missing_values_count)
+train_dataset_filled = train_dataset.fillna(method="ffill")# fill the NA with the priveous value
+train_dataset_filled = train_dataset_filled.fillna(method="backfill")# fill the NA with the next value
+missing_values_count1 = (train_dataset_filled .isnull().sum() * 100 / len(train_dataset_filled ))
+print(missing_values_count1)
 
 # dropping col or rows
 # new_train_dataset = train_dataset.dropna(axis=0, thresh=10)  # axis=0 means rows (1 means columns)
@@ -163,25 +192,6 @@ pd.set_option('display.max_rows', 500)
 # print(missing_values_count_new)
 
 
-# print_data_unique_values(train_dataset)
-# print_data_summaries(train_dataset)
-# plot_cor_matrix(train_dataset)
-# print(len(train_dataset.index))
 
 
-
-
-
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-#                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-#                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-#                "Color_variations", "Dispatch_loc", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Buy_premium"]].median()) # shows median
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Buy_premium"]].mode()) # shows mode
 
