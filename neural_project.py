@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn as sb
 import matplotlib.pyplot as mp
 import numpy as np
+from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 
 
@@ -25,6 +26,8 @@ from sklearn.impute import SimpleImputer
 # 15. determine buy_premium as target variable
 # 16. do we want to turn bought premium to numric and also other variables in order to see better correltion?
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
+# 18. train model
+# 19. explainable AI
 
 #done
 # 2. determine which col if any have to many NA values and therefore are unnecessary
@@ -38,40 +41,12 @@ from sklearn.impute import SimpleImputer
 # 8. create from the timestamp feature i.e. year, month, day of the week
 # 14. integrate mode and median in the summery
 
-def date_loading(path):
-    """loads the data need to get a path"""
-
-
-# def data_splitting(data):
 
 # def feature_engineering(data):
 #     """receives the project data and cleans the data"""
 #     data['Gender'].replace("F", 1, inplace=True)  # replace F to 1 # explain why
 #     data['Gender'].replace("M", 0, inplace=True)  # replace M to 0 # unsure if needed can it work with m and f?
 #     print(train_dataset.head(10))  # in order to verify
-
-
-# def drop_unneeded_columns(data):
-#     """drop unneeded columns(features): user_Id, Unnamed: 0, ought_premium"""
-#     data = data.drop(columns="User_ID")  # dropping the user_Id column.
-#     # 0 correlation with all of the features and has no meaning.
-#     data = data.drop(columns="Unnamed: 0")  #
-#     # 0 correlation with all of the features, it seems that it comes from the csv numbering
-#
-#     print(train_dataset.head(10))  # in order to verify
-
-
-# functions to describe the data
-def print_data_unique_values(data):
-    """prints the unique values and count of all the feature"""
-    for column in data:
-        print(data[column].value_counts())
-
-
-def print_data_summaries(data):
-    """prints for each feature summery statistics"""
-    for column in data:
-        print(data[column].describe(include="all", datetime_is_numeric=True))
 
 
 def plot_cor_matrix(data):
@@ -117,8 +92,11 @@ pd.set_option('display.max_rows', 500)
 
 # Data Exploration
 print(train_dataset.head(10)) # print the first 10 rows
-print_data_unique_values(train_dataset) # prints the unique values in each col and counts them
-print_data_summaries(train_dataset)# prints the data summaries
+for column in train_dataset:
+    print(train_dataset[column].value_counts())# prints the unique values in each col and counts them
+
+for column in train_dataset:
+    print(train_dataset[column].describe(include="all", datetime_is_numeric=True))# prints the data summaries
 
 # print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
 #                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
@@ -195,7 +173,7 @@ print(len(train_dataset.index)-len(new_train_dataset.index))
 # print(missing_values_count_new)
 
 
-# feature engineering
+######## feature engineering #########
 # Date
 train_dataset['Date']= pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to tpe datetime
 train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
@@ -203,4 +181,33 @@ train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis
 train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
 # print( train_dataset["month"])
 
+# days with a lot of premium
 
+# time of day
+
+# location
+
+# soci economical
+
+# creating target variable
+
+# random forest information gain
+
+# Data splitting
+# Let's say we want to split the data in 70:15:15 for train:valid:test dataset
+train_size=0.7
+
+feature_vector = train_dataset.drop(columns = ['Buy_premium']).copy()
+target_variable = train_dataset['Buy_premium']
+
+# In the first step we will split the data in training and remaining dataset to be split later to validation and test
+feature_vector_train, feature_vector_to_split, target_variable_train, target_variable_to_split = train_test_split(feature_vector,target_variable, train_size=0.7, random_state=0)
+# random_state=0 is important because it will give us the same split data everytime
+
+# Now since we want the valid and test size to be equal (15% each of overall data).
+# we have to define test_size=0.5 (that is 50% of remaining data)
+feature_vector_valid, feature_vector_test, target_variable_valid, target_variable_test = train_test_split(feature_vector_to_split,target_variable_to_split, test_size=0.5, random_state=0)
+
+print(feature_vector_train.shape), print(target_variable_train.shape)
+print(feature_vector_valid.shape), print(target_variable_valid.shape)
+print(feature_vector_test.shape), print(target_variable_test.shape)
