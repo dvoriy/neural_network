@@ -5,9 +5,11 @@ import seaborn as sb
 import matplotlib.pyplot as mp
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import RobustScaler
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
-
+#import category_encoders as ce
 
 # import pandas_profiling as pp # a libery that helps explore the data
 # profile_report = pp.ProfileReport(train_dataset, title="profile report of train data set", minimal=True)
@@ -22,15 +24,15 @@ from sklearn.impute import SimpleImputer
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features ae more important
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
-# 15. determine buy_premium as target variable
 # 16. do we want to turn bought premium to numric and also other variables in order to see better correltion?
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
-# 18. train model
+# 18. train models
 # 19. explainable AI
 # 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
 # 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
 # small medium and big than we will get 3 columns: small medium and big.
 # in the small column there will be a 1 where the row was small and zero if it was medium or big.
+# 22. explain why I imputed each feature and why I chose the way I chose
 
 #done:
 # 1. split the data: train 70%; validation 15%; test 10%
@@ -44,7 +46,7 @@ from sklearn.impute import SimpleImputer
 # 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 # 8. create from the timestamp feature i.e. year, month, day of the week
 # 14. integrate mode and median in the summery
-
+# 15. determine buy_premium as target variable
 
 # def feature_engineering(data):
 #     """receives the project data and cleans the data"""
@@ -157,6 +159,7 @@ print(missing_values_count1)
 # feature_engineering(train_dataset)
 
 # הורדה של שורות שאין להן משתנה מטרה 2608
+# can also try to knn to predict but risky
 print(len(train_dataset.index))
 new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"]) # throws out all the rows with
 # NA at the target variable
@@ -193,14 +196,48 @@ train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].media
 
 
 ######## feature engineering #########
+# data_frame =pd.DataFrame( #code for experimenting
+#     {
+#         "A": ["1", "1", "35", "67", "67", "3", "1", "344"],
+#         "B": [1, 1, 0, 1, 0, 0, 1, 1],
+#         "C": ["a", "a", "v", "v", "d", "d", "s", "s"],
+#         "D": ["a", "a", "v", "v", "d", "d", "s", "s"]
+#     })
+# df1 = data_frame.drop(columns=["C","D"])
+#
+# grouped = data_frame.groupby("A")
+#
+# print(grouped.sum())
 # Date
-train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to tpe datetime
+train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to type datetime
 train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
 # print( train_dataset["day"])
 train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
 # print( train_dataset["month"])
-
+train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_of_year), axis=1) # creates new col with month name
+# maybe can create list of holidays
 # days with a lot of premium
+# tried to see if there is any significant diffrence but didn't notice
+# droped_df1 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+# "Color_variations", "Dispatch_loc", "Bought_premium"])
+# grouped = droped_df1.groupby("day of year")
+# print(grouped.sum())
+
+# droped_df2 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+# "Color_variations", "Dispatch_loc", "Bought_premium"])
+# grouped = droped_df2.groupby("month")
+# print(grouped.sum())
+#
+# droped_df3 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+# "Color_variations", "Dispatch_loc", "Bought_premium"])
+# grouped = droped_df3.groupby("day")
+# print(grouped.sum())
 
 # time of day
 
@@ -208,9 +245,6 @@ train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), 
 
 # soci economical
 
-# random forest information gain
-# should probably do also before imputing the data and check if there is any different results and also after
-# a lot of things can affect the importance
 
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
@@ -230,3 +264,20 @@ feature_vector_valid, feature_vector_test, target_variable_valid, target_variabl
 print(feature_vector_train.shape), print(target_variable_train.shape)
 print(feature_vector_valid.shape), print(target_variable_valid.shape)
 print(feature_vector_test.shape), print(target_variable_test.shape)
+
+# random forest information gain feature selection
+# should probably do also before imputing the data and check if there is any different results and also after
+# a lot of things can affect the importance
+
+# cols = feature_vector_train.columns
+# scaler = RobustScaler()
+# feature_vector_train = scaler.fit_transform(feature_vector_train)
+# feature_vector_valid = scaler.transform(feature_vector_valid)
+#
+# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+#
+# rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
+# rfc.fit(feature_vector_train, target_variable_train) # fit the model
+# target_variable_pred_on_train_vald = rfc.predict(feature_vector_valid) # Predict the Test set results
+# print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_pred_on_train_vald)))
