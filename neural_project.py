@@ -298,7 +298,7 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 # a lot of things can affect the importance
 
 
-# Model: Random forest with 10 trees
+# Model: Random forest with 10 trees #
 cols = feature_vector_train.columns
 scaler = RobustScaler()
 feature_vector_train = scaler.fit_transform(feature_vector_train)
@@ -312,8 +312,12 @@ rfc.fit(feature_vector_train, target_variable_train) # fit the model
 target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
 print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
-confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation) # create confusion_matrix
+confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
 print('Confusion matrix\n\n', confusion_matrix)
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
 display.plot()
+
 print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
