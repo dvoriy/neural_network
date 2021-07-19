@@ -117,6 +117,7 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
 
+
 plot_cor_matrix(train_dataset)# creating cor mat for only the  numeric and undropped variables.
 # non numeric variables which have no hierarchy - most of the time won't give us meaningful information
 # do we want to create cor matrix with the non numeric data????? using hierarchy?
@@ -145,12 +146,12 @@ print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
 # אולי צריך להפריד את הנתונים לנומרי ולא נומרי ואז לבצע את השינוי ולאחר מכן לחבר
 
 # fill NA
-missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
-print(missing_values_count)
-train_dataset_filled = train_dataset.fillna(method="ffill")# fill the NA with the priveous value
-train_dataset_filled = train_dataset_filled.fillna(method="backfill")# fill the NA with the next value
-missing_values_count1 = (train_dataset_filled .isnull().sum() * 100 / len(train_dataset_filled ))
-print(missing_values_count1)
+# missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+# print(missing_values_count)
+# train_dataset_filled = train_dataset.fillna(method="ffill")# fill the NA with the priveous value
+# train_dataset_filled = train_dataset_filled.fillna(method="backfill")# fill the NA with the next value
+# missing_values_count1 = (train_dataset_filled .isnull().sum() * 100 / len(train_dataset_filled ))
+# print(missing_values_count1)
 
 # dropping col or rows
 # new_train_dataset = train_dataset.dropna(axis=0, thresh=10)  # axis=0 means rows (1 means columns)
@@ -165,8 +166,13 @@ new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"
 # NA at the target variable
 print(len(new_train_dataset.index))
 print(len(train_dataset.index)-len(new_train_dataset.index))
+train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True) # throws out all the rows with
+print(len(train_dataset.index))
 
 # impute categorical data with mode
+missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+print(missing_values_count)
+
 train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)
 train_dataset['Location'].fillna(train_dataset['Location'].mode()[0], inplace=True)
 train_dataset['Mouse_activity_1'].fillna(train_dataset['Mouse_activity_1'].mode()[0], inplace=True)
@@ -186,6 +192,7 @@ train_dataset['Commercial_3'].fillna(train_dataset['Commercial_3'].median(), inp
 train_dataset['Jewelry'].fillna(train_dataset['Jewelry'].median(), inplace=True)
 train_dataset['Shoes'].fillna(train_dataset['Shoes'].median(), inplace=True)
 train_dataset['Clothing'].fillna(train_dataset['Clothing'].median(), inplace=True)
+train_dataset['Home'].fillna(train_dataset['Home'].median(), inplace=True)
 train_dataset['Premium'].fillna(train_dataset['Premium'].median(), inplace=True)
 train_dataset['Idle'].fillna(train_dataset['Idle'].median(), inplace=True)
 train_dataset['Post_premium_commercial'].fillna(train_dataset['Post_premium_commercial'].median(), inplace=True)
@@ -193,6 +200,8 @@ train_dataset['Premium_commercial_play'].fillna(train_dataset['Premium_commercia
 train_dataset['Size_variations'].fillna(train_dataset['Size_variations'].median(), inplace=True)
 train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].median(), inplace=True)
 
+missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+print(missing_values_count)
 
 
 ######## feature engineering #########
@@ -246,6 +255,21 @@ train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_
 # soci economical
 
 
+#### droping categorical data #####
+train_dataset = train_dataset.drop(columns="Gender")
+train_dataset = train_dataset.drop(columns="Location")
+train_dataset = train_dataset.drop(columns="Mouse_activity_1")
+train_dataset = train_dataset.drop(columns="Time")
+train_dataset = train_dataset.drop(columns="Date")
+train_dataset = train_dataset.drop(columns="Mouse_activity_2")
+train_dataset = train_dataset.drop(columns="Mouse_activity_3")
+train_dataset = train_dataset.drop(columns="Dispatch_loc")
+train_dataset = train_dataset.drop(columns="Bought_premium")
+train_dataset = train_dataset.drop(columns="day")
+train_dataset = train_dataset.drop(columns="month")
+train_dataset = train_dataset.drop(columns="day of year")
+
+
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
 train_size=0.7
@@ -269,15 +293,15 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 # should probably do also before imputing the data and check if there is any different results and also after
 # a lot of things can affect the importance
 
-# cols = feature_vector_train.columns
-# scaler = RobustScaler()
-# feature_vector_train = scaler.fit_transform(feature_vector_train)
-# feature_vector_valid = scaler.transform(feature_vector_valid)
-#
-# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-#
-# rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
-# rfc.fit(feature_vector_train, target_variable_train) # fit the model
-# target_variable_pred_on_train_vald = rfc.predict(feature_vector_valid) # Predict the Test set results
-# print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_pred_on_train_vald)))
+cols = feature_vector_train.columns
+scaler = RobustScaler()
+feature_vector_train = scaler.fit_transform(feature_vector_train)
+feature_vector_valid = scaler.transform(feature_vector_valid)
+
+feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+
+rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train) # fit the model
+target_variable_pred_on_train_vald = rfc.predict(feature_vector_valid) # Predict the Test set results
+print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_pred_on_train_vald)))
