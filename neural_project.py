@@ -8,6 +8,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import RobustScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.metrics import ConfusionMatrixDisplay
+
 
 #import category_encoders as ce
 
@@ -293,6 +297,8 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 # should probably do also before imputing the data and check if there is any different results and also after
 # a lot of things can affect the importance
 
+
+# Model: Random forest with 10 trees
 cols = feature_vector_train.columns
 scaler = RobustScaler()
 feature_vector_train = scaler.fit_transform(feature_vector_train)
@@ -303,5 +309,11 @@ feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
 
 rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
 rfc.fit(feature_vector_train, target_variable_train) # fit the model
-target_variable_pred_on_train_vald = rfc.predict(feature_vector_valid) # Predict the Test set results
-print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_pred_on_train_vald)))
+target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
+print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation) # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix)
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)
+display.plot()
+print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
