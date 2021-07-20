@@ -28,7 +28,6 @@ from sklearn.metrics import roc_auc_score
 # 10. normalize the data
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features ae more important
-# 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 16. do we want to turn bought premium to numric and also other variables in order to see better correltion?
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
 # 18. train models
@@ -50,6 +49,7 @@ from sklearn.metrics import roc_auc_score
 # 4. determine how to handle NA values and write a function
 # 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 # 8. create from the timestamp feature i.e. year, month, day of the week
+# 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median in the summery
 # 15. determine buy_premium as target variable
 
