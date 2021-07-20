@@ -11,6 +11,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import roc_auc_score
 
 
 #import category_encoders as ce
@@ -142,7 +143,7 @@ print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
 
 
 # כדי להשלים נתונים חסרים הכי טוב להשתמש ב KNN
-# עמודה עם יותר מ-60% ערכים חסירם היא מיותרת
+# עמודה עם יותר מ-60% ערכים חסרhם היא מיותרת
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
 # בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
@@ -321,3 +322,5 @@ display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an o
 display.plot()
 
 print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+
+print("SUC score:"+roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation))
