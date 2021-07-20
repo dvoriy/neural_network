@@ -1,6 +1,7 @@
 import pandas as pd
 import random
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 def plot_elbow(list):
     centers = []
@@ -19,7 +20,7 @@ def plot_list(list, mid_points):
     x = []
     y = []
     color = []
-    colors = ("red", "green", "blue","yellow")
+    colors = ("red", "green", "blue", "yellow")
 
     for element in list:
         cur_color = colors[(list.index(element) % len(colors))]
@@ -93,8 +94,13 @@ def pick_start_points(num_of_centers, x_array):
 if __name__ == '__main__':
     print("starting to read data files")
     clustering_dataset = read_data_files('self')
+
+    kmeans = KMeans(n_clusters=3, random_state=0)
+
+    kmeans.fit(clustering_dataset)
+    print(kmeans.cluster_centers_)
     for i in range(1, 10):
-        d_in_prog =  clustering_dataset['Machine.num.'+str(i)]
+        d_in_prog = clustering_dataset['Machine.num.'+str(i)]
         K=17
         converged =[]
         results = []
