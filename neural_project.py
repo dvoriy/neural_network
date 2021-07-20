@@ -122,6 +122,96 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
 
+#### catgorical variables exploration ####
+gender_df = train_dataset.drop(columns=["User_ID","Unnamed: 0", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium"])
+grouped = gender_df.groupby("Gender")
+VCL = train_dataset["Gender"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Location sorting percentage of positive buy premium)")
+print("")
+Location_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium"])
+grouped = Location_df.groupby("Location")
+VCL = train_dataset["Location"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Mouse_activity_1 sorting (percentage of positive buy premium)")
+print("")
+Mouse_activity_1_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium"])
+grouped = Mouse_activity_1_df.groupby("Mouse_activity_1")
+VCL = train_dataset["Mouse_activity_1"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Mouse_activity_2 sorting (percentage of positive buy premium)")
+print("")
+Mouse_activity_2_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium"])
+grouped = Mouse_activity_2_df.groupby("Mouse_activity_2")
+VCL = train_dataset["Mouse_activity_2"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Mouse_activity_3 sorting (percentage of positive buy premium)")
+print("")
+Mouse_activity_3_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc", "Bought_premium"])
+grouped = Mouse_activity_3_df.groupby("Mouse_activity_3")
+VCL = train_dataset["Mouse_activity_3"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Dispatch_loc sorting (percentage of positive buy premium)")
+print("")
+Dispatch_loc_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Bought_premium"])
+grouped = Dispatch_loc_df.groupby("Dispatch_loc")
+VCL = train_dataset["Dispatch_loc"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
+print("Bought_premium sorting (percentage of positive buy premium)")
+print("")
+Bought_premium_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+"Color_variations", "Dispatch_loc"])
+grouped = Bought_premium_df.groupby("Bought_premium")
+VCL = train_dataset["Bought_premium"].value_counts()
+GSL =grouped.sum()
+GSL["How many"] = VCL
+GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+print(GSL.sort_values(by="percentage"))
+
 
 plot_cor_matrix(train_dataset)# creating cor mat for only the  numeric and undropped variables.
 # non numeric variables which have no hierarchy - most of the time won't give us meaningful information
