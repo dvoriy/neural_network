@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import sys
 import operator
 import time
+from sklearn.cluster import DBSCAN
 from k_means import update_centers
 from k_means import  update_diff
 
@@ -27,7 +28,7 @@ def silhuette_width(list):
                     continue
                 for element in neighbor_cluster:
                     cur_min=(abs(element - point)/len(neighbor_cluster))
-                    if  cur_min < min_dist_out_of_cluster:
+                    if cur_min < min_dist_out_of_cluster:
                         min_dist_out_of_cluster = cur_min
 
             b.append(min_dist_out_of_cluster)

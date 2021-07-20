@@ -41,7 +41,7 @@ def parse_line(line):
     print("dictionary", d, " label = ", label)
     return d, label
 
-def csv_input_fn(csv_path, batch_size):
+def csv_input_fn(csv_path):
     dataset = pd.read_csv(csv_path)
     dataset = dataset[1:]
     dataset = pd.DataFrame(dataset)
@@ -64,24 +64,8 @@ def csv_input_fn(csv_path, batch_size):
 
 
 if __name__ == '__main__':
-#    ds = csv_input_fn("ctr_dataset_train.csv", 1)
-    Min_prod_time = tf.feature_column.numeric_column("Min_prod_time")
-    Max_prod_time = tf.feature_column.numeric_column("Max_prod_time")
-    Commercial_1 = tf.feature_column.numeric_column("Commercial_1")
-    Commercial_2 = tf.feature_column.numeric_column("Commercial_2")
-    Commercial_3 = tf.feature_column.numeric_column("Commercial_3")
-    Jewelry = tf.feature_column.numeric_column("Jewelry")
-    Shoes = tf.feature_column.numeric_column("Shoes")
-    Clothing = tf.feature_column.numeric_column("Clothing")
-    Idle = tf.feature_column.numeric_column("Idle")
-    Post_premium_commercial = tf.feature_column.numeric_column("Post_premium_commercial")
-    Premium_commercial_play = tf.feature_column.numeric_column("Premium_commercial_play")
-    Size_variations = tf.feature_column.numeric_column("Size_variations")
-    Color_variations = tf.feature_column.numeric_column("Color_variations")
-    feature_columns = [Min_prod_time, Max_prod_time, Commercial_1, Commercial_2, Commercial_3, Jewelry, Shoes,
-                   Clothing, Idle, Post_premium_commercial, Premium_commercial_play, Size_variations, Color_variations]
 
-    (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv", 1)
+    (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv")
     model = keras.Sequential([
         keras.layers.Reshape(target_shape=(1 * 21,), input_shape=(1, 21)),
         keras.layers.Dense(units=256, activation='relu'),
