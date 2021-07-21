@@ -12,6 +12,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
+#from category_encoders import
 
 
 #import category_encoders as ce
@@ -102,9 +103,13 @@ pd.set_option('display.max_rows', 500)
 
 # Data Exploration
 print(train_dataset.head(10)) # print the first 10 rows
+print("")
+print("Unique values in each col and count")
 for column in train_dataset:
     print(train_dataset[column].value_counts())# prints the unique values in each col and counts them
 
+print("")
+print("Data summaries")
 for column in train_dataset:
     print(train_dataset[column].describe(include="all", datetime_is_numeric=True))# prints the data summaries
 
@@ -122,6 +127,7 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
 
 # Date handling
+train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # 0.068555 values are Na imputing here
 train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to type datetime
 train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
 train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
@@ -130,6 +136,8 @@ train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_
 # Time handling
 
 #### categorical variables exploration ####
+print("")
+print("Gender sorting percentage of positive buy premium)")
 gender_df = train_dataset.drop(columns=["User_ID","Unnamed: 0", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
 "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
@@ -463,4 +471,4 @@ display.plot()
 
 print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
 
-print("SUC score:"+roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation))
+print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
