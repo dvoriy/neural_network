@@ -30,7 +30,7 @@ from sklearn.preprocessing import StandardScaler
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features are more important
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
-# 18. train models
+# 18. train NN
 # 19. explainable AI
 # 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
 # 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
