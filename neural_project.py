@@ -462,59 +462,32 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 
 
 # Model: Random forest with 10 trees #
-cols = feature_vector_train.columns
-scaler = RobustScaler()
-feature_vector_train = scaler.fit_transform(feature_vector_train)
-feature_vector_valid = scaler.transform(feature_vector_valid)
+# cols = feature_vector_train.columns
+# scaler = RobustScaler()
+# feature_vector_train = scaler.fit_transform(feature_vector_train)
+# feature_vector_valid = scaler.transform(feature_vector_valid)
+#
+# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+#
+# rfc = RandomForestClassifier(n_estimators=10, random_state=0) # instantiate the classifier
+# rfc.fit(feature_vector_train, target_variable_train) # fit the model
+# target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
+# print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+#
+# confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
+# print('Confusion matrix\n\n', confusion_matrix)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+#
+# print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
 
-feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-
-rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
-rfc.fit(feature_vector_train, target_variable_train) # fit the model
-target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
-print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
-
-confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
-print('Confusion matrix\n\n', confusion_matrix)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
-
-print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
-
-# Model: Random forest with 100 trees #
-cols = feature_vector_train.columns
-scaler = RobustScaler()
-feature_vector_train = scaler.fit_transform(feature_vector_train)
-feature_vector_valid = scaler.transform(feature_vector_valid)
-
-feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-
-rfc = RandomForestClassifier(n_estimators=100, random_state=0) # instantiate the classifier
-rfc.fit(feature_vector_train, target_variable_train) # fit the model
-target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
-print('Model accuracy score with 100 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
-
-confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
-print('Confusion matrix\n\n', confusion_matrix)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
-
-print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
-
-
-# Model: Random forest with 200 trees #
+# Model: Random forest with 100 trees # better results then 10 trees
 cols = feature_vector_train.columns
 scaler = RobustScaler()
 feature_vector_train = scaler.fit_transform(feature_vector_train)
@@ -539,3 +512,36 @@ display.plot()
 print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
 
 print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+
+# Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
+# cols = feature_vector_train.columns
+# scaler = RobustScaler()
+# feature_vector_train = scaler.fit_transform(feature_vector_train)
+# feature_vector_valid = scaler.transform(feature_vector_valid)
+#
+# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+#
+# rfc = RandomForestClassifier(n_estimators=200, random_state=0) # instantiate the classifier
+# rfc.fit(feature_vector_train, target_variable_train) # fit the model
+# target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
+# print('Model accuracy score with 100 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+#
+# confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
+# print('Confusion matrix\n\n', confusion_matrix)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+#
+# print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+
+print("We did hyperparameter tuning on the number of trees")
+print("we tried 10 trees, 100 trees and 200 trees")
+print("the best results were with 100 trees")
+print("the number of trees is the number of individual decision trees the random forest creates")
+print("with low numbers the more we add the better the results will be")
+print("but at a certain point the results will start to be worse due too overfitting")
