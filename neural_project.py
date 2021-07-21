@@ -12,6 +12,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
+from sklearn.preprocessing import StandardScaler
+
 #from category_encoders import
 
 
@@ -25,7 +27,6 @@ from sklearn.metrics import roc_auc_score
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
 # 9. create from the time feature a morning noon evening night feature
-# 10. normalize the data
 # 11. balance the data
 # 12. use random forest information gain in order to determine which features are more important
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
@@ -49,6 +50,7 @@ from sklearn.metrics import roc_auc_score
 # 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 # 6. we need to add one summery statistic to non-numeric variables
 # 8. create from the timestamp feature i.e. year, month, day of the week
+# 10. normalize the data
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median in the summery
 # 15. determine buy_premium as target variable
@@ -125,6 +127,20 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
+
+# Data normalization - we chose not to normalize the data because we use Random forest
+# scaler = StandardScaler()
+# print(train_dataset.head(10))
+# num_cols = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))] # index of numric colums
+# num_cols = num_cols.drop("Buy_premium") # dropping Buy_premium from index
+# num_cols = num_cols.drop("Unnamed: 0") # dropping Unnamed: 0 from index
+# num_cols = num_cols.drop("User_ID") # dropping User_ID from index
+# print(num_cols)
+# scaler.fit(train_dataset[num_cols])
+# scaler.mean_
+# train_dataset[num_cols] = scaler.transform(train_dataset[num_cols])
+# train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
+# print(train_dataset.head(10))
 
 # Date handling
 train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # 0.068555 values are Na imputing here
@@ -268,14 +284,12 @@ GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 
-plot_cor_matrix(train_dataset)# creating cor mat for only the  numeric and undropped variables.
-# non numeric variables which have no hierarchy - most of the time won't give us meaningful information
-# do we want to create cor matrix with the non numeric data????? using hierarchy?
+plot_cor_matrix(train_dataset)# creating cor mat for only the numeric categorical d
 train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
 # 0 correlation with all of the features and has no meaning.
 train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
 # 0 correlation with all of the features, it seems that it comes from the csv numbering
-
+plot_cor_matrix(train_dataset) # creating cor mat for only the numeric and undropped variables.
 # Fixing negative valuse - we assume that the negative values represent people who didn't Post_premium_commercial
 train_dataset[train_dataset['Idle'] < 0] = 0
 train_dataset[train_dataset['Post_premium_commercial'] < 0] = 0
@@ -288,7 +302,7 @@ print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
 
 
 # כדי להשלים נתונים חסרים הכי טוב להשתמש ב KNN
-# עמודה עם יותר מ-60% ערכים חסרhם היא מיותרת
+# עמודה עם יותר מ-60% ערכים חסרים היא מיותרת
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
 # בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
@@ -460,6 +474,59 @@ rfc = RandomForestClassifier(random_state=0) # instantiate the classifier
 rfc.fit(feature_vector_train, target_variable_train) # fit the model
 target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
 print('Model accuracy score with 10 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+
+print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+
+# Model: Random forest with 100 trees #
+cols = feature_vector_train.columns
+scaler = RobustScaler()
+feature_vector_train = scaler.fit_transform(feature_vector_train)
+feature_vector_valid = scaler.transform(feature_vector_valid)
+
+feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+
+rfc = RandomForestClassifier(n_estimators=100, random_state=0) # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train) # fit the model
+target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+
+print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+
+
+# Model: Random forest with 200 trees #
+cols = feature_vector_train.columns
+scaler = RobustScaler()
+feature_vector_train = scaler.fit_transform(feature_vector_train)
+feature_vector_valid = scaler.transform(feature_vector_valid)
+
+feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+
+rfc = RandomForestClassifier(n_estimators=100, random_state=0) # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train) # fit the model
+target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
 confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
 print('Confusion matrix\n\n', confusion_matrix)
