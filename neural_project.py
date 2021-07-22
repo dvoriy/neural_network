@@ -128,7 +128,8 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
 
-# Data normalization - we chose not to normalize the data because we use Random forest
+# Data normalization - we chose not to normalize the data because we use Random forest,
+# and the model doesn't assume normalized data
 # scaler = StandardScaler()
 # print(train_dataset.head(10))
 # num_cols = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))] # index of numric colums
