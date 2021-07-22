@@ -3,27 +3,14 @@ import pandas as pd
 import numpy as np
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from sklearn.metrics import silhouette_score
 
-# https://scikit-learn.org/stable/auto_examples/cluster/plot_dbscan.html#sphx-glr-auto-examples-cluster-plot-dbscan-py
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     OMP_NUM_THREADS = 10
     print("starting to read data files")
     clustering_dataset = pd.read_csv("Clustering.csv")
     K = 5
-    #kmeans = KMeans(n_clusters=3, random_state=0)
-
-    cs = []
-    results = []
-    for i in range(1, K):
-        clustering = DBSCAN(eps=4.0/i, min_samples=10, n_jobs=-1).fit(clustering_dataset)
-        core_samples_mask = np.zeros_like(clustering.labels_, dtype=bool)
-        core_samples_mask[clustering.core_sample_indices_] = True
-        labels = clustering.labels_
-        n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-        n_noise_ = list(labels).count(-1)
-        print(n_clusters_)
 
 
     pca = PCA(n_components=2)
@@ -39,8 +26,23 @@ if __name__ == '__main__':
         labels = clustering.labels_
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
         n_noise_ = list(labels).count(-1)
-        print(n_clusters_)
 
     plt.scatter(X_principal['P1'], X_principal['P2'],
-           c = DBSCAN(eps=4.0/5, min_samples=10, n_jobs=-1).fit(X_principal), cmap =plt.cm.winter)
+           c = labels , cmap =plt.cm.winter)
+    plt.show()
+
+
+
+
+    silhouette_scores = []
+
+    for n_cluster in range(2, K):
+        silhouette_scores.append(silhouette_score(X_principal, DBSCAN(eps=4.0/n_cluster, min_samples=10, n_jobs=-1).fit_predict(X_principal)))
+
+
+        # Plotting a bar graph to compare the results
+    k = [3, 4, 5]
+    plt.bar(k, silhouette_scores)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Silhouette Score', fontsize=10)
     plt.show()
