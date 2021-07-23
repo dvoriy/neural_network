@@ -14,11 +14,13 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
+import shap
 
-#from category_encoders import
+
+# from category_encoders import
 
 
-#import category_encoders as ce
+# import category_encoders as ce
 
 # import pandas_profiling as pp # a libery that helps explore the data
 # profile_report = pp.ProfileReport(train_dataset, title="profile report of train data set", minimal=True)
@@ -39,7 +41,7 @@ from imblearn.over_sampling import SMOTE, SMOTENC
 # in the small column there will be a 1 where the row was small and zero if it was medium or big.
 # 22. explain why I imputed each feature and why I chose the way I chose
 
-#done:
+# done:
 # 1. split the data: train 70%; validation 15%; test 10%
 # 2. determine which col if any have to many NA values and therefore are unnecessary
 #    meaning that that we leave a feature outside
@@ -61,7 +63,7 @@ def plot_cor_matrix(data):
     returns the table of the unique features correlation"""
     correlation_matrix = data.corr()  # creating correlation_matrix
     # print(correlation_matrix)
-    dataplot = sb.heatmap(correlation_matrix)  # creating a heat map of the correlation_matrix
+    #dataplot = sb.heatmap(correlation_matrix)  # creating a heat map of the correlation_matrix
     mp.show()  # showing the correlation_matrix
     sorted_mat = correlation_matrix.unstack().sort_values()
     # Retain upper triangular values of correlation matrix and
@@ -93,21 +95,21 @@ def how_many_na_col_percentage(data):
 # if __name__ == '__main__':
 
 
-train_dataset = pd.read_csv("ctr_dataset_train.csv") # loading the data
+train_dataset = pd.read_csv("ctr_dataset_train.csv")  # loading the data
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
 
 # Data Exploration
-print(train_dataset.head(10)) # print the first 10 rows
+print(train_dataset.head(10))  # print the first 10 rows
 print("")
 print("Unique values in each col and count")
 for column in train_dataset:
-    print(train_dataset[column].value_counts())# prints the unique values in each col and counts them
+    print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
 
 print("")
 print("Data summaries")
 for column in train_dataset:
-    print(train_dataset[column].describe(include="all", datetime_is_numeric=True))# prints the data summaries
+    print(train_dataset[column].describe(include="all", datetime_is_numeric=True))  # prints the data summaries
 
 # print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
 #                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
@@ -115,10 +117,11 @@ for column in train_dataset:
 #                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
 print("")
 print("median of numeric")
-print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median()) # shows median
+print(train_dataset[
+          ["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+           "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+           "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+           "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
 # print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
 # "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
@@ -145,11 +148,13 @@ print("Data normalization - we chose not to normalize the data because we use Ra
 print("")
 print("creating new date related features")
 # Date handling
-train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # 0.068555 values are Na imputing here
-train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to type datetime
-train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
-train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
-train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_of_year), axis=1) # creates new col with month name
+train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True)  # 0.068555 values are Na imputing here
+train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True)  # transform the date to type datetime
+train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1)  # creates a new col with day name
+train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(),
+                                             axis=1)  # creates new col with month name
+train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_of_year),
+                                                   axis=1)  # creates new col with month name
 
 print("")
 
@@ -160,152 +165,181 @@ print("")
 print("we now display for each unique value of categorical feature the number of positive Buy_premium")
 print("")
 print("Gender sorting percentage of positive buy premium)")
-gender_df = train_dataset.drop(columns=["User_ID","Unnamed: 0", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc","day","month","day of year", "Bought_premium"]) # dropping all features except for
+gender_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1",
+             "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "Dispatch_loc", "day", "month", "day of year",
+             "Bought_premium"])  # dropping all features except for
 # the one we want to create the table for
-grouped = gender_df.groupby("Gender") # creating a grouped object that contains rows that are the target column
-VCL = train_dataset["Gender"].value_counts() # counting and storing the unique values in the target column
-GSL =grouped.sum() # summing the Buy_premium target variable for each unique value
-GSL["How many"] = VCL # combing the VCL and GSL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"] # # creating a percentage column
-print(GSL.sort_values(by="percentage")) # printing and sorting
+grouped = gender_df.groupby("Gender")  # creating a grouped object that contains rows that are the target column
+VCL = train_dataset["Gender"].value_counts()  # counting and storing the unique values in the target column
+GSL = grouped.sum()  # summing the Buy_premium target variable for each unique value
+GSL["How many"] = VCL  # combing the VCL and GSL
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]  # # creating a percentage column
+print(GSL.sort_values(by="percentage"))  # printing and sorting
 
 print("")
 print("Location sorting percentage of positive buy premium)")
-Location_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc", "day","month","day of year", "Bought_premium"])
+Location_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1",
+             "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "Dispatch_loc", "day", "month", "day of year", "Bought_premium"])
 grouped = Location_df.groupby("Location")
 VCL = train_dataset["Location"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("Mouse_activity_1 sorting (percentage of positive buy premium)")
-Mouse_activity_1_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc","day","month","day of year", "Bought_premium"])
+Mouse_activity_1_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "Dispatch_loc", "day", "month", "day of year", "Bought_premium"])
 grouped = Mouse_activity_1_df.groupby("Mouse_activity_1")
 VCL = train_dataset["Mouse_activity_1"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("Mouse_activity_2 sorting (percentage of positive buy premium)")
-Mouse_activity_2_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc","day","month","day of year", "Bought_premium"])
+Mouse_activity_2_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "Dispatch_loc", "day", "month", "day of year", "Bought_premium"])
 grouped = Mouse_activity_2_df.groupby("Mouse_activity_2")
 VCL = train_dataset["Mouse_activity_2"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("Mouse_activity_3 sorting (percentage of positive buy premium)")
-Mouse_activity_3_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "Dispatch_loc", "day","month","day of year", "Bought_premium"])
+Mouse_activity_3_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "Dispatch_loc", "day", "month", "day of year", "Bought_premium"])
 grouped = Mouse_activity_3_df.groupby("Mouse_activity_3")
 VCL = train_dataset["Mouse_activity_3"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("Dispatch_loc sorting (percentage of positive buy premium)")
-Dispatch_loc_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations","day","month","day of year", "Bought_premium"])
+Dispatch_loc_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "day", "month", "day of year", "Bought_premium"])
 grouped = Dispatch_loc_df.groupby("Dispatch_loc")
 VCL = train_dataset["Dispatch_loc"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("Bought_premium sorting (percentage of positive buy premium)")
-Bought_premium_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations","day","month","day of year", "Dispatch_loc"])
+Bought_premium_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "day", "month", "day of year", "Dispatch_loc"])
 grouped = Bought_premium_df.groupby("Bought_premium")
 VCL = train_dataset["Bought_premium"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("day sorting (percentage of positive buy premium)")
-day_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "month","day of year", "Dispatch_loc", "Bought_premium"])
+day_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "month", "day of year", "Dispatch_loc", "Bought_premium"])
 grouped = day_df.groupby("day")
 VCL = train_dataset["day"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("month sorting (percentage of positive buy premium)")
-month_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "day","day of year", "Dispatch_loc", "Bought_premium"])
+month_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "day", "day of year", "Dispatch_loc", "Bought_premium"])
 grouped = month_df.groupby("month")
 VCL = train_dataset["month"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 print("")
 print("day of year sorting (percentage of positive buy premium)")
-day_of_year_df = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-"Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-"Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-"Color_variations", "day","month", "Dispatch_loc", "Bought_premium"])
+day_of_year_df = train_dataset.drop(
+    columns=["User_ID", "Unnamed: 0", "Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time",
+             "Commercial_1", "Commercial_2",
+             "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
+             "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+             "Color_variations", "day", "month", "Dispatch_loc", "Bought_premium"])
 grouped = day_of_year_df.groupby("day of year")
 VCL = train_dataset["day of year"].value_counts()
-GSL =grouped.sum()
+GSL = grouped.sum()
 GSL["How many"] = VCL
-GSL["percentage"] = GSL["Buy_premium"]/GSL["How many"]
+GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
-
-plot_cor_matrix(train_dataset)# creating cor mat for only the numeric categorical d
+print("")
+print("Plotting correlation matrix")
+plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
 # 0 correlation with all of the features and has no meaning.
 train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
 # 0 correlation with all of the features, it seems that it comes from the csv numbering
-plot_cor_matrix(train_dataset) # creating cor mat for only the numeric and undropped variables.
-# Fixing negative valuse - we assume that the negative values represent people who didn't Post_premium_commercial
+print("")
+print("Plotting correlation matrix after dropped some features (explain in comments)")
+plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric and undropped variables.
+# Fixing negative values - we assume that the negative values represent people who didn't Post_premium_commercial
 train_dataset[train_dataset['Idle'] < 0] = 0
 train_dataset[train_dataset['Post_premium_commercial'] < 0] = 0
 # print_data_summaries(train_dataset)
 
 ####### NA handling #######
-print(len(train_dataset.index)) # number of lines in the data
-print(how_many_na_col(train_dataset)) # number of na in each col
-print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
-
+print("")
+print("number of lines in the data")
+print(len(train_dataset.index))  # number of lines in the data
+print("")
+print("number of na in each col")
+print(how_many_na_col(train_dataset))  # number of na in each col
+print("")
+print("percentage of na in each col")
+print(how_many_na_col_percentage(train_dataset))  # percentage of na in each col
 
 # כדי להשלים נתונים חסרים הכי טוב להשתמש ב KNN
 # עמודה עם יותר מ-60% ערכים חסרים היא מיותרת
@@ -332,18 +366,21 @@ print(how_many_na_col_percentage(train_dataset)) # percentage of na in each col
 # הורדה של שורות שאין להן משתנה מטרה 2608
 # can also try to knn to predict but risky
 print(len(train_dataset.index))
-new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"]) # throws out all the rows with NA at the target variable
+new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=[
+    "Buy_premium"])  # throws out all the rows with NA at the target variable
 print(len(new_train_dataset.index))
-print(len(train_dataset.index)-len(new_train_dataset.index))
-train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True) # throws out all the rows with
+print(len(train_dataset.index) - len(new_train_dataset.index))
+train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True)  # throws out all the rows with
 # NA at the target variable
 print(len(train_dataset.index))
 
 # impute categorical data with mode
 missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+print("")
+print("displaying Na count for each feature")
 print(missing_values_count)
 
-train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True) # there is no significant difference
+train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)  # there is no significant difference
 # between Male and Female in order to predict target variable
 # consider to drop
 train_dataset['Location'].fillna(train_dataset['Location'].mode()[0], inplace=True)
@@ -374,8 +411,9 @@ train_dataset['Size_variations'].fillna(train_dataset['Size_variations'].median(
 train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].median(), inplace=True)
 
 missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+print("")
+print("displaying Na count for each feature after NA handling")
 print(missing_values_count)
-
 
 ######## feature engineering #########
 # data_frame =pd.DataFrame( #code for experimenting
@@ -442,21 +480,22 @@ train_dataset = train_dataset.drop(columns="day")
 train_dataset = train_dataset.drop(columns="month")
 train_dataset = train_dataset.drop(columns="day of year")
 
-
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
-train_size=0.7
+train_size = 0.7
 
-feature_vector = train_dataset.drop(columns = ['Buy_premium']).copy()
+feature_vector = train_dataset.drop(columns=['Buy_premium']).copy()
 target_variable = train_dataset['Buy_premium']
 
 # In the first step we will split the data in training and remaining dataset to be split later to validation and test
-feature_vector_train, feature_vector_to_split, target_variable_train, target_variable_to_split = train_test_split(feature_vector,target_variable, train_size=0.7, random_state=0)
+feature_vector_train, feature_vector_to_split, target_variable_train, target_variable_to_split = train_test_split(
+    feature_vector, target_variable, train_size=0.7, random_state=0)
 # random_state=0 is important because it will give us the same split data everytime
 
 # Now since we want the valid and test size to be equal (15% each of overall data).
 # we have to define test_size=0.5 (that is 50% of remaining data)
-feature_vector_valid, feature_vector_test, target_variable_valid, target_variable_test = train_test_split(feature_vector_to_split,target_variable_to_split, test_size=0.5, random_state=0)
+feature_vector_valid, feature_vector_test, target_variable_valid, target_variable_test = train_test_split(
+    feature_vector_to_split, target_variable_to_split, test_size=0.5, random_state=0)
 
 print(feature_vector_train.shape), print(target_variable_train.shape)
 print(feature_vector_valid.shape), print(target_variable_valid.shape)
@@ -504,22 +543,25 @@ feature_vector_valid = scaler.transform(feature_vector_valid)
 feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
 feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
 
-rfc = RandomForestClassifier(n_estimators=100, random_state=0) # instantiate the classifier
-rfc.fit(feature_vector_train, target_variable_train) # fit the model
-target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid) # Predict the Test set results
-print('Model accuracy score with 100 decision-trees : {0:0.4f}'. format(accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train)  # fit the model
+target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid)  # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+    accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
-confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation, labels=[1,0]) # create confusion_matrix
+confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation,
+                                    labels=[1, 0])  # create confusion_matrix
 print('Confusion matrix\n\n', confusion_matrix)
 print("TP, FN")
 print("FP, TN")
 
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
 display.plot()
 
-print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
+print(classification_report(target_variable_valid,
+                            target_variable_prediction_on_train_validation))  # create classification_report of varius indicators
 
-print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
 # Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
 # cols = feature_vector_train.columns
@@ -553,3 +595,11 @@ print("the best results were with 100 trees")
 print("the number of trees is the number of individual decision trees the random forest creates")
 print("with low numbers the more we add the better the results will be")
 print("but at a certain point the results will start to be worse due too overfitting")
+
+# SHAP Value
+print("")
+explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap values
+shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
+
+shap.summary_plot(shap_values[1], feature_vector_valid)
+print("summary_plot executed")
