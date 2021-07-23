@@ -71,10 +71,15 @@ print(feature_vector.dtypes) # type check
 #         "C": [32, 523, 23, 42, 1, 31, 188, 23],
 #         "D": ["x", "x", "z", "a", "v", "d", "d", "a"]
 #     })
-
+num_of_entries = 32000
 # feature_vector = data_frame.drop(columns = ['B']).copy()
 # target_variable = data_frame['B']
 print(feature_vector.head(10))
 smote = SMOTENC(random_state=100, categorical_features=[0,1,2,3,9,10,11,22,23]) # creating SMOTEC obkect
-feature_vector_res, target_variable_res = smote.fit_resample(feature_vector, target_variable) # transform the data
-print(feature_vector_res.head(10))
+feature_vector_res_head, target_variable_res_head = smote.fit_resample(feature_vector.head(num_of_entries), target_variable.head(num_of_entries)) # transform the data
+#print(feature_vector_res_head)
+feature_vector_res_tail, target_variable_res_tail = smote.fit_resample(feature_vector.tail(num_of_entries), target_variable.tail(num_of_entries)) # transform the data
+
+feature_vector_res = pd.concat([feature_vector_res_head, feature_vector_res_tail])
+target_variable_res = pd.concat([target_variable_res_head, target_variable_res_tail])
+print (target_variable_res.head())
