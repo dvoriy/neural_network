@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE, SMOTENC
 
 #from category_encoders import
 
@@ -27,7 +28,7 @@ from sklearn.preprocessing import StandardScaler
 # 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
 #    center or by socioeconomic scale.
 # 9. create from the time feature a morning noon evening night feature
-# 11. balance the data
+# 11. balance the data - cant run it
 # 12. use random forest information gain in order to determine which features are more important
 # 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
 # 18. train NN
@@ -54,13 +55,6 @@ from sklearn.preprocessing import StandardScaler
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median in the summery
 # 15. determine buy_premium as target variable
-
-# def feature_engineering(data):
-#     """receives the project data and cleans the data"""
-#     data['Gender'].replace("F", 1, inplace=True)  # replace F to 1 # explain why
-#     data['Gender'].replace("M", 0, inplace=True)  # replace M to 0 # unsure if needed can it work with m and f?
-#     print(train_dataset.head(10))  # in order to verify
-
 
 def plot_cor_matrix(data):
     """receives data and plot a heat map of the correlation matrix and a table of the unique features correlation
@@ -119,6 +113,8 @@ for column in train_dataset:
 #                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 #                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 #                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
+print("")
+print("median of numeric")
 print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
 "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
 "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
@@ -128,6 +124,9 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
 # "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
 
+print("")
+print("Data normalization - we chose not to normalize the data because we use Random forest,"
+      "and the model doesn't assume normalized data")
 # Data normalization - we chose not to normalize the data because we use Random forest,
 # and the model doesn't assume normalized data
 # scaler = StandardScaler()
@@ -143,6 +142,8 @@ print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max
 # train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
 # print(train_dataset.head(10))
 
+print("")
+print("creating new date related features")
 # Date handling
 train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # 0.068555 values are Na imputing here
 train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to type datetime
@@ -150,9 +151,13 @@ train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis
 train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
 train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_of_year), axis=1) # creates new col with month name
 
+print("")
+
 # Time handling
 
 #### categorical variables exploration ####
+print("")
+print("we now display for each unique value of categorical feature the number of positive Buy_premium")
 print("")
 print("Gender sorting percentage of positive buy premium)")
 gender_df = train_dataset.drop(columns=["User_ID","Unnamed: 0", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
@@ -488,6 +493,8 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 #
 # print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
 
+print("")
+print("Random forest with 100 trees:")
 # Model: Random forest with 100 trees # better results then 10 trees
 cols = feature_vector_train.columns
 scaler = RobustScaler()
