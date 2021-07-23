@@ -602,4 +602,16 @@ explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap val
 shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
 
 shap.summary_plot(shap_values[1], feature_vector_valid)
+print("")
+print("The summary plot combines feature importance with feature effects. Each point on the summary plot"
+      " is a Shapley value for a feature and an instance. The position on the y-axis is determined by the"
+      " feature and on the x-axis by the Shapley value. The color represents the value of the feature from "
+      "low to high. Overlapping points are jittered in y-axis direction, so we get a sense of the distribution "
+      "of the Shapley values per feature. The features are ordered according to their importance. In  other words:"
+      "the the y axis shows the feature value high value will be pink low value will be blue."
+      "the X axis shows the SHAP VALUE of the feature for each predication. the features are also ordered "
+      "in accordance with their importance. Overall we get a sense of how the feature effect on the predication,"
+      "in terms of importance overall, how high or low value have impact on the shap value."
+      "the higher the shap value the higher the improtance")
 print("summary_plot executed")
+
