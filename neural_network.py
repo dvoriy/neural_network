@@ -3,10 +3,19 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 from sklearn import preprocessing
-
+import statistics
+from sklearn.metrics import accuracy_score
 
 pd.set_option('display.max_columns', 500)
 pd.set_option('display.max_rows', 500)
+
+
+def how_many_na_col(data):
+    """get the number of missing data per column"""
+    missing_values_count = data.isnull().sum()
+    missing_values_count.append(data.isnull().sum() * 100 / len(data))
+    return missing_values_count[0:]
+
 
 
 def csv_input_fn(csv_path):
@@ -32,6 +41,7 @@ def csv_input_fn(csv_path):
     dataset.pop('Dispatch_loc')
     dataset['Gender'].replace("F", 1, inplace=True)
     dataset['Gender'].replace("M", 0, inplace=True)
+    dataset['Gender'].fillna(0, inplace=True)
     dataset['Bought_premium'].replace("Yes", 1, inplace=True)  # replace Yes to 1 # explain why
     dataset['Bought_premium'].replace("No", 0, inplace=True)  # replace No to 0 # explain why
 
@@ -68,43 +78,41 @@ def csv_input_fn(csv_path):
 
     dataset = preprocessing.minmax_scale(dataset, feature_range=(0, 1), axis=0, copy=True)
 
-    for element in dataset:
-        if pd.isna(element.any()):
-            print("Empty value!!!")
 
     return dataset, label
 
 
 if __name__ == '__main__':
 
-    (x_train, y_train) = csv_input_fn("yos_dataset_test.csv")
+    (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv")
     model = keras.Sequential([
         keras.layers.Dense(units=12, activation='relu'),
         keras.layers.Dense(units=1, activation='sigmoid')
     ])
 
     model.compile(optimizer='adam',
-          #    loss=tf.losses.CategoricalCrossentropy(from_logits=True),
               loss='mse',
               metrics=['accuracy'])
 
     history = model.fit(
         x_train, y_train,
-        epochs=3,
-        steps_per_epoch=5,
-        validation_steps=2
+        epochs=10,
+        steps_per_epoch=50,
+        validation_steps=5
     )
+
+    print("test")
 
     (x_validate, y_validate) = csv_input_fn("ctr_dataset_test.csv")
     y_pred = model.predict(x_validate)
 #Converting predictions to label
     pred = list()
+    median = statistics.median(y_pred)
     for i in range(len(y_pred)):
-        if y_pred[i] > 0.5:
+        if y_pred[i] > median:
             pred.append(1)
         else:
             pred.append(0)
 
-    print(pred)
-    print(y_pred)
-
+    a = accuracy_score(pred, y_validate)
+    print("Accuracy is: " + str(a))
