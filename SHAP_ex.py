@@ -51,7 +51,7 @@ print("TP, FN")
 print("FP, TN")
 
 display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix) #create an onbject to display the confusion_matrix
-display.plot()
+# display.plot()
 
 print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
 
