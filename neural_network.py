@@ -98,9 +98,11 @@ if __name__ == '__main__':
     history = model.fit(
         x_train, y_train,
         epochs=10,
-        steps_per_epoch=15,
+        steps_per_epoch=50,
         validation_steps=5
     )
+
+    print("test")
 
     (x_validate, y_validate) = csv_input_fn("ctr_dataset_test.csv")
     y_pred = model.predict(x_validate)
