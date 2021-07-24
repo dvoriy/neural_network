@@ -370,7 +370,7 @@ print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left,
 print(train_dataset["Mouse_activity_1"].value_counts())
 print(train_dataset["Mouse_activity_2"].value_counts())
 print(train_dataset["Mouse_activity_3"].value_counts())
-
+print("hi")
 
 print("")
 print("Plotting correlation matrix after dropped some features (explain in comments)")
