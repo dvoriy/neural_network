@@ -53,12 +53,14 @@ def csv_input_fn(csv_path):
     dataset.pop('Mouse_activity_1')
     dataset.pop('Mouse_activity_2')
     dataset.pop('Mouse_activity_3')
+    dataset.pop('Dispatch_loc')
     dataset['Gender'].replace("F", 1, inplace=True)
     dataset['Gender'].replace("M", 0, inplace=True)
     dataset['Bought_premium'].replace("Yes", 1, inplace=True)  # replace Yes to 1 # explain why
     dataset['Bought_premium'].replace("No", 0, inplace=True)  # replace No to 0 # explain why
 
     label = dataset.pop('Buy_premium')
+    dataset = np.asarray(dataset).astype(np.float32)
 
     return dataset, label
 
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 
     (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv")
     model = keras.Sequential([
-        keras.layers.Reshape(target_shape=(1 * 21,), input_shape=(1, 21)),
+        keras.layers.Reshape(target_shape=(1 * 18,), input_shape=(1, 18)),
         keras.layers.Dense(units=256, activation='relu'),
         keras.layers.Dense(units=192, activation='relu'),
         keras.layers.Dense(units=128, activation='relu'),
