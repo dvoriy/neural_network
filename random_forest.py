@@ -12,69 +12,18 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
-from tensorflow import keras
-import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
-#import shap
+import shap
 from sklearn import preprocessing
 
 
-# #onhotencoder works
-# print(train_dataset.head(10))
-# # enc = preprocessing.OneHotEncoder(handle_unknown="ignore", sparse=False)
-# categorical_columns_names = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, object))]
-# print(categorical_columns_names)
-# categorical_columns_names = categorical_columns_names.drop("Date")
-# categorical_columns_names = categorical_columns_names.drop("Time")
-# categorical_columns_names = categorical_columns_names.drop("Bought_premium")
-#
-# # enc.fit(data_frame[["D"]])
-# # data_frame = pd.DataFrame((enc.transform(data_frame[categorical_columns_names])))
-# # data_frame.columns = enc.get_feature_names(categorical_columns_names)
-# # print(data_frame.head(10))
-#
-# OH_encoder = preprocessing.OneHotEncoder(handle_unknown='ignore', sparse=False)
-# OH_cols_train = pd.DataFrame(OH_encoder.fit_transform(train_dataset[categorical_columns_names]))
-# # OH_cols_valid = pd.DataFrame(OH_encoder.transform(test_data[object_cols]))
-# #
-# # # Adding column names to the encoded data set.
-# OH_cols_train.columns = OH_encoder.get_feature_names(categorical_columns_names)
-# # OH_cols_valid.columns = OH_encoder.get_feature_names(object_cols)
-# #
-# # # One-hot encoding removed index; put it back
-# OH_cols_train.index = train_dataset.index
-# # OH_cols_valid.index = test_data.index
-# #
-# # # Remove categorical columns (will replace with one-hot encoding)
-# num_X_train = train_dataset.drop(categorical_columns_names, axis=1)
-# # num_X_valid = test_data.drop(object_cols, axis=1)
-# #
-# # # Add one-hot encoded columns to numerical features
-# train_dataset = pd.concat([num_X_train, OH_cols_train], axis=1)
-# # test_data = pd.concat([num_X_valid, OH_cols_valid], axis=1)
-# print(train_dataset.head(10))
-
-# import category_encoders as ce
-
-# import pandas_profiling as pp # a libery that helps explore the data
-# profile_report = pp.ProfileReport(train_dataset, title="profile report of train data set", minimal=True)
-# profile_report.to_file("output.html")
 
 # to do list:
-# 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
-#    center or by socioeconomic scale.
-# 9. create from the time feature a morning noon evening night feature
-# 11. balance the data - cant run it
 # 12. use random forest information gain in order to determine which features are more important
-# 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
-# 18. train NN
-# 19. explainable AI
+# 19. explainable AI - local explain
 # 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
-# 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
-# small medium and big than we will get 3 columns: small medium and big.
-# in the small column there will be a 1 where the row was small and zero if it was medium or big.
-# 22. explain why I imputed each feature and why I chose the way I chose
+print("start")
 
 # done:
 # 1. split the data: train 70%; validation 15%; test 10%
@@ -87,11 +36,21 @@ from sklearn import preprocessing
 # 4. determine how to handle NA values and write a function
 # 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
 # 6. we need to add one summery statistic to non-numeric variables
+# 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
+#    center or by socioeconomic scale.
 # 8. create from the timestamp feature i.e. year, month, day of the week
+# 9. create from the time feature a morning noon evening night feature
 # 10. normalize the data
+# 11. balance the data - cant run it - we chose not to
 # 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
 # 14. integrate mode and median in the summery
 # 15. determine buy_premium as target variable
+# 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
+# 18. train NN
+# 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
+# small medium and big than we will get 3 columns: small medium and big.
+# in the small column there will be a 1 where the row was small and zero if it was medium or big.
+# 22. explain why I imputed each feature and why I chose the way I chose
 
 def plot_cor_matrix(data):
     """receives data and plot a heat map of the correlation matrix and a table of the unique features correlation
@@ -124,11 +83,6 @@ def how_many_na_col_percentage(data):
     """get the percentage of missing data per column"""
     missing_values_count = (data.isnull().sum() * 100 / len(data))
     return missing_values_count[0:]
-
-
-# Press the green button in the gutter to run the script.
-# if __name__ == '__main__':
-
 
 train_dataset = pd.read_csv("ctr_dataset_train.csv")  # loading the data
 pd.set_option('display.max_columns', 500)
@@ -165,6 +119,7 @@ print(train_dataset[
 print("")
 print("Data normalization - we chose not to normalize the data because we use Random forest,"
       "and the model doesn't assume normalized data")
+
 # Data normalization - we chose not to normalize the data because we use Random forest,
 # and the model doesn't assume normalized data
 # scaler = StandardScaler()
@@ -180,9 +135,19 @@ print("Data normalization - we chose not to normalize the data because we use Ra
 # train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
 # print(train_dataset.head(10))
 
+# Balanced data
+print("")
+print("We chose not to balanced the data because balancing damaged the model prediction")
+print("We chose SMOTE -Synthetic Minority Oversampling TEchnique. SMOTE creates new samples of the minority Data")
+print("in our case the positive but data. it creates it by looking at the minority data and creating similar rows")
+print("this can help the model by balancing the data. when model are created with unbalanced data they tend to be")
+print("not as good in prediction on the minority data")
+
+
+
+# Date handling
 print("")
 print("creating new date related features")
-# Date handling
 train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True)  # 0.068555 values are Na imputing here
 train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True)  # transform the date to type datetime
 train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1)  # creates a new col with day name
@@ -192,8 +157,6 @@ train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_
                                                    axis=1)  # creates new col with month name
 
 print("")
-
-# Time handling
 
 #### categorical variables exploration ####
 print("")
@@ -350,17 +313,37 @@ GSL["How many"] = VCL
 GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
+
+# droping features
 print("")
 print("Plotting correlation matrix")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
 # 0 correlation with all of the features and has no meaning.
 print("")
-print("dropping the user_Id column")
+print("dropping the user_Id column.  has no meaning.")
 train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
-# 0 correlation with all of the features, it seems that it comes from the csv numbering
+# it seems that it comes from the csv numbering
 print("")
-print(" dropping the Unnamed: 0 column")
+print(" dropping the Unnamed: 0 column. 0 correlation with all of the features, it seems that it comes from the csv numbering")
+train_dataset = train_dataset.drop(columns="Date") # droping the date column  doesn't contribute to prediction
+# moreover we create based on him other columns
+print("")
+print(" dropping the Date column. doesn't contribute moreover we create based on him other columns")
+train_dataset = train_dataset.drop(columns="day") # droping the date column  doesn't contribute to prediction
+print("")
+print(" dropping the day column. doesn't contribute to prediction")
+train_dataset = train_dataset.drop(columns="day of year") # droping the day of year column  doesn't contribute to prediction
+print("")
+print(" dropping the day of year column. doesn't contribute to prediction")
+train_dataset = train_dataset.drop(columns="Time") # droping the Time column  doesn't contribute to prediction
+print("")
+print(" dropping the Time column. doesn't contribute to prediction")
+train_dataset = train_dataset.drop(columns="Dispatch_loc")# droping the Dispatch_loc column  doesn't contribute to prediction
+print("")
+print(" dropping the Dispatch_loc column. doesn't contribute to prediction")
+
+# feature engineering 2
 # feature engineering for Mouse_activity_1/2/3
 train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
                        "Down-Right": 0, "Down": 0, "Left-Down-Left": 0, "Down-Down-Right": 0, "Right-Up-Right":0,
@@ -372,11 +355,55 @@ print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left,
 print(train_dataset["Mouse_activity_1"].value_counts())
 print(train_dataset["Mouse_activity_2"].value_counts())
 print(train_dataset["Mouse_activity_3"].value_counts())
-print("hi")
 
+
+train_dataset.replace({"Nof Hagalil": 1, "Dimona": 1, "Tamra": 1, "Haifa": 1, "Akko": 1, "Migdal HaEmek ": 1, "Safed": 1,
+                       "Kiryat Gat": 1, "Migdal HaEmek": 1, "Hadera": 1, "Maalot Tarshiha": 1, "Harish": 1, "Kiryat Motzkin": 1,
+                       "Rehovot": 1, "Herzliya": 1, "Ramla": 1, "Beer Sheva": 1, "Hod HaSharon": 1, "Tel Aviv": 1,
+                       "Kiryat Ono": 1, "Tiberias": 1, "Yavne": 1, "Jerusalem": 1, "Beit Shemesh": 1, "Kfar Sava": 1,
+
+                       "Afula": 0, "Raanana": 0,"Arad": 0,"Nes Ziona": 0,"Karmiel": 0,"Modiin": 0,"Nazareth": 0,
+                       "Sakhnin": 0,"Ashkelon": 0, "Eilat": 0,"Beit Shean": 0,"Petah Tikva": 0,"Netanya": 0,"Shefaram": 0,
+                       "Nahariya": 0,"Holon": 0,"Rishon Lezion": 0,"Kiryat Shemone": 0,
+                       "Ramat Gan": 0,"Kiryat Bialik": 0,"Givatayim": 0,"Kiryat Ata": 0,"Ashdod": 0,"Yokneam": 0,
+                       "Sderot": 0}, inplace=True)
 print("")
-print("Plotting correlation matrix after dropped some features (explain in comments)")
+print(train_dataset["Location"].value_counts())
+print("transforming the Location column. Nof Hagalil, Dimona, Tamra, Haifa, Akko, Migdal HaEmek, Safed,"
+      "Kiryat Gat, Migdal HaEmek, Hadera, Maalot Tarshiha, Harish, Kiryat Motzkin,"
+      "Rehovot, Herzliya, Ramla, Beer Sheva, Hod HaSharon, Tel Aviv,"
+      "Kiryat Ono, Tiberias, Yavne, Jerusalem, Beit Shemesh, Kfar Sava replaced with 1"
+      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+
+# feature engineering for Bought_premium
+train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
+print("")
+print(train_dataset["Bought_premium"].value_counts())
+print("transforming the Bought_premium columns. Yes are replaced with 1"
+      "NO with 0. this is because the 1 values have a higher chances of positive buy")
+
+train_dataset.replace({"F": 1, "M": 0}, inplace=True)
+print("")
+print(train_dataset["Gender"].value_counts())
+print("transforming the Gender columns. Female are replaced with 1"
+      "Male with 0. for the model to work with")
+
+train_dataset.replace({"July": 1, "June": 1, "August": 1, "September": 0, "May": 0, "April": 0,
+                       "November": 0, "March": 0, "December": 0, "October": 0, "January": 0, "February":0
+                       }, inplace=True)
+print("")
+print(train_dataset["month"].value_counts())
+print("transforming the month columns. July, June and August are replaced with 1"
+      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+
+# Plotting correlation matrix after dropped some features (explain in comments)
+print("")
+print("Plotting correlation matrix after dropped some features only the numeric and undropped variables"
+      "variables that are droped are not relevent anymore")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric and undropped variables.
+
+
+
 
 # Fixing negative values - we assume that the negative values represent people who didn't Post_premium_commercial
 train_dataset[train_dataset['Idle'] < 0] = 0
@@ -400,9 +427,6 @@ print(how_many_na_col_percentage(train_dataset))  # percentage of na in each col
 # עמודה עם יותר מ-60% ערכים חסרים היא מיותרת
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
-# בחרתי כן להוריד כל שורה שאין לה משתנה מטרה ידוע מדובר בהורדה של 2608 שורות
-# לאחר שנריץ חשיבות משתנים נוכל להחליט להוריד למשל שורות שאין להן את המשתנים החשובים ביותר
-# אולי צריך להפריד את הנתונים לנומרי ולא נומרי ואז לבצע את השינוי ולאחר מכן לחבר
 
 # fill NA
 # missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
@@ -418,18 +442,28 @@ print(how_many_na_col_percentage(train_dataset))  # percentage of na in each col
 # "colname2"] - tells where to check for an valuse - after correlation and information gain we can decide
 # feature_engineering(train_dataset)
 
-# הורדה של שורות שאין להן משתנה מטרה 2608
-# can also try to knn to predict but risky
+# throws out all the rows with NA at the target variable
+# we chose to throws out all the rows with NA at the target variable because we can't train the model on htem
+# we could use KNN to try to predict the target variable but that is risky becuase it a prediction on predication
+# moreover the number we dispoed is not that big and shouln't affect the results
+print("")
 print(len(train_dataset.index))
+print("this is the number of rows in the data frame")
 new_train_dataset = train_dataset.dropna(axis=0, thresh=1, subset=[
     "Buy_premium"])  # throws out all the rows with NA at the target variable
 print(len(new_train_dataset.index))
-print(len(train_dataset.index) - len(new_train_dataset.index))
+print("this is the number of rows after we throws out all the rows with NA at the target variable")
+print("we dispoed of"+str(len(train_dataset.index) - len(new_train_dataset.index))+"rows")
 train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True)  # throws out all the rows with
 # NA at the target variable
 print(len(train_dataset.index))
+print("this is the number of rows in the data frame after throw")
+print("# we chose to throws out all the rows with NA at the target variable because we can't train the model on them"
+      "we could use KNN to try to predict the target variable but that is risky becuase it a prediction on predication"
+      "moreover the number we dispoed is not that big and shouln't affect the results")
 
-# impute categorical data with mode
+
+# impute categorical data
 missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
 print("")
 print("displaying Na count for each feature")
@@ -437,18 +471,20 @@ print(missing_values_count)
 
 train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)  # there is no significant difference
 # between Male and Female in order to predict target variable
-# consider to drop
-train_dataset['Location'].fillna(train_dataset['Location'].mode()[0], inplace=True)
-#
-train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True)
-train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True)
+print("")
+print("imputing Gender NA Values with mode Because because most of the entries are male.")
+train_dataset['Location'].fillna(value=0, inplace=True)
+print("")
+print("imputing Location NA Values with 0 Because we rather have FN than FP.")
+# train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True) # droped
+# train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # droped
 train_dataset['Mouse_activity_1'].fillna(value=0, inplace=True) # imputing Mouse_activity NA values with 0 because we
 train_dataset['Mouse_activity_2'].fillna(value=0, inplace=True) # rather have FN than FP.
 train_dataset['Mouse_activity_3'].fillna(value=0, inplace=True)
 print("")
 print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN than FP.")
-train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True)
-train_dataset['Bought_premium'].fillna(value="No", inplace=True) # imputing Bought_premium NA Values with NO
+# train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True) # droped
+train_dataset['Bought_premium'].fillna(value=0, inplace=True) # imputing Bought_premium NA Values with 0
 # Because we rather have FN than FP.
 print("")
 print("imputing Bought_premium NA Values with NO Because we rather have FN than FP.")
@@ -476,77 +512,12 @@ print("")
 print("displaying Na count for each feature after NA handling")
 print(missing_values_count)
 
-######## feature engineering #########
-# data_frame =pd.DataFrame( #code for experimenting
-#     {
-#         "A": ["1", "1", "35", "67", "67", "3", "1", "344"],
-#         "B": [1, 1, 0, 1, 0, 0, 1, 1],
-#         "C": ["a", "a", "v", "v", "d", "d", "s", "s"],
-#         "D": ["a", "a", "v", "v", "d", "d", "s", "s"]
-#     })
-# df1 = data_frame.drop(columns=["C","D"])
-#
-# grouped = data_frame.groupby("A")
-#
-# print(grouped.sum())
-# Date
-# train_dataset['Date'] = pd.to_datetime(train_dataset['Date'], dayfirst=True) # transform the date to type datetime
-# train_dataset["day"] = train_dataset.apply(lambda row: row.Date.day_name(), axis=1) # creates a new col with day name
-# print( train_dataset["day"])
-# train_dataset["month"] = train_dataset.apply(lambda row: row.Date.month_name(), axis=1) # creates new col with month name
-# print( train_dataset["month"])
-# train_dataset["day of year"] = train_dataset.apply(lambda row: str(row.Date.day_of_year), axis=1) # creates new col with month name
-# maybe can create list of holidays
-# days with a lot of premium
-# tried to see if there is any significant diffrence but didn't notice
-# droped_df1 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Bought_premium"])
-# grouped = droped_df1.groupby("day of year")
-# print(grouped.sum())
-
-# droped_df2 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Bought_premium"])
-# grouped = droped_df2.groupby("month")
-# print(grouped.sum())
-#
-# droped_df3 = train_dataset.drop(columns=["User_ID","Unnamed: 0","Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Bought_premium"])
-# grouped = droped_df3.groupby("day")
-# print(grouped.sum())
-
-# time of day
-
-# location
-
-# soci economical
-
-
-#### droping categorical data #####
-train_dataset = train_dataset.drop(columns="Gender")
-train_dataset = train_dataset.drop(columns="Location")
-train_dataset = train_dataset.drop(columns="Time")
-train_dataset = train_dataset.drop(columns="Date")
-train_dataset = train_dataset.drop(columns="Dispatch_loc")
-train_dataset = train_dataset.drop(columns="Bought_premium")
-train_dataset = train_dataset.drop(columns="day")
-train_dataset = train_dataset.drop(columns="month")
-train_dataset = train_dataset.drop(columns="day of year")
-
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
 train_size = 0.7
 
 feature_vector = train_dataset.drop(columns=['Buy_premium']).copy()
 target_variable = train_dataset['Buy_premium']
-
-
-
 
 # In the first step we will split the data in training and remaining dataset to be split later to validation and test
 feature_vector_train, feature_vector_to_split, target_variable_train, target_variable_to_split = train_test_split(
@@ -558,33 +529,14 @@ feature_vector_train, feature_vector_to_split, target_variable_train, target_var
 feature_vector_valid, feature_vector_test, target_variable_valid, target_variable_test = train_test_split(
     feature_vector_to_split, target_variable_to_split, test_size=0.5, random_state=0)
 
-
 print(feature_vector_train.shape), print(target_variable_train.shape)
 print(feature_vector_valid.shape), print(target_variable_valid.shape)
 print(feature_vector_test.shape), print(target_variable_test.shape)
 
-
-model = keras.Sequential([
-    keras.layers.Reshape(target_shape=(1 * 18,), input_shape=(1, 18)),
-    keras.layers.Dense(units=12, activation='relu'),
-    keras.layers.Dense(units=1, activation='softmax')
-])
-
-model.compile(optimizer='adam',
-              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
-              metrics=['accuracy'])
-
-history = model.fit(
-    feature_vector_train, target_variable_train,
-    epochs=10,
-    steps_per_epoch=500,
-    validation_steps=2
-)
-
 # random forest information gain feature selection
 # should probably do also before imputing the data and check if there is any different results and also after
 # a lot of things can affect the importance
-
+print()
 
 # Model: Random forest with 10 trees #
 # cols = feature_vector_train.columns
