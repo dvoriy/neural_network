@@ -96,7 +96,7 @@ def plot_cor_matrix(data):
     returns the table of the unique features correlation"""
     correlation_matrix = data.corr()  # creating correlation_matrix
     # print(correlation_matrix)
-    #dataplot = sb.heatmap(correlation_matrix)  # creating a heat map of the correlation_matrix
+    dataplot = sb.heatmap(correlation_matrix)  # creating a heat map of the correlation_matrix
     mp.show()  # showing the correlation_matrix
     sorted_mat = correlation_matrix.unstack().sort_values()
     # Retain upper triangular values of correlation matrix and
@@ -353,15 +353,36 @@ print("Plotting correlation matrix")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
 # 0 correlation with all of the features and has no meaning.
+print("")
+print("dropping the user_Id column")
 train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
 # 0 correlation with all of the features, it seems that it comes from the csv numbering
 print("")
+print(" dropping the Unnamed: 0 column")
+# feature engineering for Mouse_activity_1/2/3
+train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
+                       "Down-Right": 0, "Down": 0, "Left-Down-Left": 0, "Down-Down-Right": 0, "Right-Up-Right":0,
+                       "Down-Left": 0, "Right": 0, "Right-Down-Right": 0, "Up-Right": 0, "Down-Down-Left": 0,
+                       "Up-Up-Right":0}, inplace=True)
+print("")
+print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left, Up-Up-Left are replaced with 1"
+      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+print(train_dataset["Mouse_activity_1"].value_counts())
+print(train_dataset["Mouse_activity_2"].value_counts())
+print(train_dataset["Mouse_activity_3"].value_counts())
+
+
+print("")
 print("Plotting correlation matrix after dropped some features (explain in comments)")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric and undropped variables.
+
 # Fixing negative values - we assume that the negative values represent people who didn't Post_premium_commercial
 train_dataset[train_dataset['Idle'] < 0] = 0
 train_dataset[train_dataset['Post_premium_commercial'] < 0] = 0
 # print_data_summaries(train_dataset)
+
+
+
 
 ####### NA handling #######
 print("")
@@ -374,7 +395,6 @@ print("")
 print("percentage of na in each col")
 print(how_many_na_col_percentage(train_dataset))  # percentage of na in each col
 
-# כדי להשלים נתונים חסרים הכי טוב להשתמש ב KNN
 # עמודה עם יותר מ-60% ערכים חסרים היא מיותרת
 # Color_variations העמודות Commercial_2 ו Commercial_3 ו Size_variations
 # יש להן יותר מ 40% ערכים נעלמים אבל בחרתי לא להוריד אותן בנתיים
@@ -418,13 +438,19 @@ train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True) 
 # consider to drop
 train_dataset['Location'].fillna(train_dataset['Location'].mode()[0], inplace=True)
 #
-train_dataset['Mouse_activity_1'].fillna(train_dataset['Mouse_activity_1'].mode()[0], inplace=True)
 train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True)
 train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True)
-train_dataset['Mouse_activity_2'].fillna(train_dataset['Mouse_activity_2'].mode()[0], inplace=True)
-train_dataset['Mouse_activity_3'].fillna(train_dataset['Mouse_activity_3'].mode()[0], inplace=True)
+train_dataset['Mouse_activity_1'].fillna(value=0, inplace=True) # imputing Mouse_activity NA values with 0 because we
+train_dataset['Mouse_activity_2'].fillna(value=0, inplace=True) # rather have FN than FP.
+train_dataset['Mouse_activity_3'].fillna(value=0, inplace=True)
+print("")
+print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN than FP.")
 train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True)
-train_dataset['Bought_premium'].fillna(train_dataset['Bought_premium'].mode()[0], inplace=True)
+train_dataset['Bought_premium'].fillna(value="No", inplace=True) # imputing Bought_premium NA Values with NO
+# Because we rather have FN than FP.
+print("")
+print("imputing Bought_premium NA Values with NO Because we rather have FN than FP.")
+
 
 # impute numeric data with median
 train_dataset['Min_prod_time'].fillna(train_dataset['Min_prod_time'].median(), inplace=True)
@@ -502,11 +528,8 @@ print(missing_values_count)
 #### droping categorical data #####
 train_dataset = train_dataset.drop(columns="Gender")
 train_dataset = train_dataset.drop(columns="Location")
-train_dataset = train_dataset.drop(columns="Mouse_activity_1")
 train_dataset = train_dataset.drop(columns="Time")
 train_dataset = train_dataset.drop(columns="Date")
-train_dataset = train_dataset.drop(columns="Mouse_activity_2")
-train_dataset = train_dataset.drop(columns="Mouse_activity_3")
 train_dataset = train_dataset.drop(columns="Dispatch_loc")
 train_dataset = train_dataset.drop(columns="Bought_premium")
 train_dataset = train_dataset.drop(columns="day")
@@ -632,8 +655,9 @@ print("but at a certain point the results will start to be worse due too overfit
 # SHAP Value
 print("")
 explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap values
+print("explainer check")
 shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
-
+print("shap_values check")
 shap.summary_plot(shap_values[1], feature_vector_valid)
 print("")
 print("A SHAP value interpret the impact of having a certain value for a given feature in comparison to the prediction "
