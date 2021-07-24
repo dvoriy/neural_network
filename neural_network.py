@@ -2,6 +2,7 @@ import pandas as pd
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
+from sklearn import preprocessing
 
 
 pd.set_option('display.max_columns', 500)
@@ -17,6 +18,10 @@ def csv_input_fn(csv_path):
                            "Down-Left": 0, "Right": 0, "Right-Down-Right": 0, "Up-Right": 0, "Down-Down-Left": 0,
                            "Up-Up-Right": 0}, inplace=True)
 
+
+    dataset.pop('Mouse_activity_1')
+    dataset.pop('Mouse_activity_2')
+    dataset.pop('Mouse_activity_3')
     dataset.pop('Unnamed: 0')
     dataset.pop('Date')
     dataset.pop('Location')
@@ -29,6 +34,11 @@ def csv_input_fn(csv_path):
     dataset['Gender'].replace("M", 0, inplace=True)
     dataset['Bought_premium'].replace("Yes", 1, inplace=True)  # replace Yes to 1 # explain why
     dataset['Bought_premium'].replace("No", 0, inplace=True)  # replace No to 0 # explain why
+
+    dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True)  # throws out all the rows with
+    # NA at the target variable
+    dataset.dropna(axis=0, thresh=1, subset=["Bought_premium"], inplace=True)  # throws out all the rows with
+    # NA at the target variable
 
     dataset['Min_prod_time'].fillna(dataset['Min_prod_time'].median(), inplace=True)
     dataset['Max_prod_time'].fillna(dataset['Max_prod_time'].median(), inplace=True)
@@ -46,31 +56,55 @@ def csv_input_fn(csv_path):
     dataset['Size_variations'].fillna(dataset['Size_variations'].median(), inplace=True)
     dataset['Color_variations'].fillna(dataset['Color_variations'].median(), inplace=True)
 
-    dataset.replace("NA", 0, inplace=True)
+    dataset.replace('NA', 0, inplace=True)
+    dataset.replace('nan', 0, inplace=True)
+    dataset.replace('', 0, inplace=True)
+    dataset.replace('None', 0, inplace=True)
+    dataset.replace('NAN', 0, inplace=True)
+    dataset.replace('NAT', 0, inplace=True)
     label = dataset.pop('Buy_premium')
 
     dataset = np.asarray(dataset).astype(np.float32)
+
+    dataset = preprocessing.minmax_scale(dataset, feature_range=(0, 1), axis=0, copy=True)
+
+    for element in dataset:
+        if pd.isna(element.any()):
+            print("Empty value!!!")
 
     return dataset, label
 
 
 if __name__ == '__main__':
 
-    (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv")
+    (x_train, y_train) = csv_input_fn("yos_dataset_test.csv")
     model = keras.Sequential([
-        keras.layers.Reshape(target_shape=(1 * 20,), input_shape=(1, 20)),
         keras.layers.Dense(units=12, activation='relu'),
-        keras.layers.Dense(units=1, activation='softmax')
+        keras.layers.Dense(units=1, activation='sigmoid')
     ])
 
     model.compile(optimizer='adam',
-              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+          #    loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+              loss='mse',
               metrics=['accuracy'])
 
     history = model.fit(
         x_train, y_train,
-        epochs=10,
-        steps_per_epoch=500,
+        epochs=3,
+        steps_per_epoch=5,
         validation_steps=2
     )
+
+    (x_validate, y_validate) = csv_input_fn("ctr_dataset_test.csv")
+    y_pred = model.predict(x_validate)
+#Converting predictions to label
+    pred = list()
+    for i in range(len(y_pred)):
+        if y_pred[i] > 0.5:
+            pred.append(1)
+        else:
+            pred.append(0)
+
+    print(pred)
+    print(y_pred)
 
