@@ -12,9 +12,11 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
+from tensorflow import keras
+import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
-import shap
+#import shap
 from sklearn import preprocessing
 
 
@@ -543,6 +545,9 @@ train_size = 0.7
 feature_vector = train_dataset.drop(columns=['Buy_premium']).copy()
 target_variable = train_dataset['Buy_premium']
 
+
+
+
 # In the first step we will split the data in training and remaining dataset to be split later to validation and test
 feature_vector_train, feature_vector_to_split, target_variable_train, target_variable_to_split = train_test_split(
     feature_vector, target_variable, train_size=0.7, random_state=0)
@@ -553,9 +558,28 @@ feature_vector_train, feature_vector_to_split, target_variable_train, target_var
 feature_vector_valid, feature_vector_test, target_variable_valid, target_variable_test = train_test_split(
     feature_vector_to_split, target_variable_to_split, test_size=0.5, random_state=0)
 
+
 print(feature_vector_train.shape), print(target_variable_train.shape)
 print(feature_vector_valid.shape), print(target_variable_valid.shape)
 print(feature_vector_test.shape), print(target_variable_test.shape)
+
+
+model = keras.Sequential([
+    keras.layers.Reshape(target_shape=(1 * 18,), input_shape=(1, 18)),
+    keras.layers.Dense(units=12, activation='relu'),
+    keras.layers.Dense(units=1, activation='softmax')
+])
+
+model.compile(optimizer='adam',
+              loss=tf.losses.CategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+history = model.fit(
+    feature_vector_train, target_variable_train,
+    epochs=10,
+    steps_per_epoch=500,
+    validation_steps=2
+)
 
 # random forest information gain feature selection
 # should probably do also before imputing the data and check if there is any different results and also after
