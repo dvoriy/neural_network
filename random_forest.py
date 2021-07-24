@@ -458,9 +458,9 @@ train_dataset.dropna(axis=0, thresh=1, subset=["Buy_premium"], inplace=True)  # 
 # NA at the target variable
 print(len(train_dataset.index))
 print("this is the number of rows in the data frame after throw")
-print("# we chose to throws out all the rows with NA at the target variable because we can't train the model on them"
-      "we could use KNN to try to predict the target variable but that is risky becuase it a prediction on predication"
-      "moreover the number we dispoed is not that big and shouln't affect the results")
+print("# we chose to throws out all the rows with NA at the target variable because we can't train the model on them")
+print("we could use KNN to try to predict the target variable but that is risky becuase it a prediction on predication")
+print("moreover the number we dispoed is not that big and shouln't affect the results")
 
 
 # impute categorical data
@@ -487,7 +487,7 @@ print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN 
 train_dataset['Bought_premium'].fillna(value=0, inplace=True) # imputing Bought_premium NA Values with 0
 # Because we rather have FN than FP.
 print("")
-print("imputing Bought_premium NA Values with NO Because we rather have FN than FP.")
+print("imputing Bought_premium NA Values with 0 Because we rather have FN than FP.")
 
 
 # impute numeric data with median
@@ -514,7 +514,17 @@ print(missing_values_count)
 
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
+print("")
+print("data splitting: 70% train, 15% validation 15% internal test")
 train_size = 0.7
+
+# droping because test is bad
+train_dataset = train_dataset.drop(columns="Mouse_activity_1")
+train_dataset = train_dataset.drop(columns="Mouse_activity_2")
+train_dataset = train_dataset.drop(columns="Mouse_activity_3")
+train_dataset = train_dataset.drop(columns="Location")
+train_dataset = train_dataset.drop(columns="month")
+train_dataset = train_dataset.drop(columns="Gender")
 
 feature_vector = train_dataset.drop(columns=['Buy_premium']).copy()
 target_variable = train_dataset['Buy_premium']
@@ -536,7 +546,7 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 # random forest information gain feature selection
 # should probably do also before imputing the data and check if there is any different results and also after
 # a lot of things can affect the importance
-print()
+
 
 # Model: Random forest with 10 trees #
 # cols = feature_vector_train.columns
@@ -564,6 +574,39 @@ print()
 #
 # print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
 
+#
+# print("")
+# print("Random forest with 100 trees:")
+# # Model: Random forest with 100 trees # better results then 10 trees
+# cols = feature_vector_train.columns
+# scaler = RobustScaler()
+# feature_vector_train = scaler.fit_transform(feature_vector_train)
+# feature_vector_valid = scaler.transform(feature_vector_valid)
+#
+# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+#
+# rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
+# rfc.fit(feature_vector_train, target_variable_train)  # fit the model
+# target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid)  # Predict the Test set results
+# print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+#     accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+#
+# confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation,
+#                                     labels=[1, 0])  # create confusion_matrix
+# print('Confusion matrix\n\n', confusion_matrix)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_valid,
+#                             target_variable_prediction_on_train_validation))  # create classification_report of varius indicators
+#
+# print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+
 print("")
 print("Random forest with 100 trees:")
 # Model: Random forest with 100 trees # better results then 10 trees
@@ -577,11 +620,11 @@ feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
 
 rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
 rfc.fit(feature_vector_train, target_variable_train)  # fit the model
-target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid)  # Predict the Test set results
+target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
 print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
-    accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+    accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
 
-confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation,
+confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
                                     labels=[1, 0])  # create confusion_matrix
 print('Confusion matrix\n\n', confusion_matrix)
 print("TP, FN")
@@ -590,10 +633,10 @@ print("FP, TN")
 display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
 display.plot()
 
-print(classification_report(target_variable_valid,
-                            target_variable_prediction_on_train_validation))  # create classification_report of varius indicators
+print(classification_report(target_variable_test,
+                            target_variable_prediction_on_train_test))  # create classification_report of varius indicators
 
-print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
 
 # Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
 # cols = feature_vector_train.columns
@@ -620,6 +663,8 @@ print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_pr
 # print(classification_report(target_variable_valid, target_variable_prediction_on_train_validation)) # create classification_report of varius indicators
 #
 # print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
+
+
 
 print("We did hyperparameter tuning on the number of trees")
 print("we tried 10 trees, 100 trees and 200 trees")
@@ -649,4 +694,5 @@ print("The summary plot combines feature importance with feature effects. Each p
       "in terms of importance overall, how high or low value have impact on the shap value."
       "the higher the shap value the higher the improtance")
 print("summary_plot executed")
+
 
