@@ -84,14 +84,13 @@ def csv_input_fn(csv_path):
 
 if __name__ == '__main__':
 
-    (x_train, y_train) = csv_input_fn("yos_dataset_test.csv")
+    (x_train, y_train) = csv_input_fn("ctr_dataset_train.csv")
     model = keras.Sequential([
         keras.layers.Dense(units=12, activation='relu'),
         keras.layers.Dense(units=1, activation='sigmoid')
     ])
 
     model.compile(optimizer='adam',
-              #loss=tf.losses.CategoricalCrossentropy(from_logits=True),
               loss='mse',
               metrics=['accuracy'])
 
@@ -115,10 +114,5 @@ if __name__ == '__main__':
         else:
             pred.append(0)
 
-    #print(head(pred,50))
-    print(pred)
-
-    print(y_validate)
-
-    a = accuracy_score(pred,y_validate)
-    print (a)
+    a = accuracy_score(pred, y_validate)
+    print("Accuracy is: " + str(a))
