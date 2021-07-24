@@ -15,10 +15,43 @@ from sklearn.metrics import roc_auc_score
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
+from sklearn import preprocessing
 
 
-# from category_encoders import
-
+# #onhotencoder works
+# print(train_dataset.head(10))
+# # enc = preprocessing.OneHotEncoder(handle_unknown="ignore", sparse=False)
+# categorical_columns_names = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, object))]
+# print(categorical_columns_names)
+# categorical_columns_names = categorical_columns_names.drop("Date")
+# categorical_columns_names = categorical_columns_names.drop("Time")
+# categorical_columns_names = categorical_columns_names.drop("Bought_premium")
+#
+# # enc.fit(data_frame[["D"]])
+# # data_frame = pd.DataFrame((enc.transform(data_frame[categorical_columns_names])))
+# # data_frame.columns = enc.get_feature_names(categorical_columns_names)
+# # print(data_frame.head(10))
+#
+# OH_encoder = preprocessing.OneHotEncoder(handle_unknown='ignore', sparse=False)
+# OH_cols_train = pd.DataFrame(OH_encoder.fit_transform(train_dataset[categorical_columns_names]))
+# # OH_cols_valid = pd.DataFrame(OH_encoder.transform(test_data[object_cols]))
+# #
+# # # Adding column names to the encoded data set.
+# OH_cols_train.columns = OH_encoder.get_feature_names(categorical_columns_names)
+# # OH_cols_valid.columns = OH_encoder.get_feature_names(object_cols)
+# #
+# # # One-hot encoding removed index; put it back
+# OH_cols_train.index = train_dataset.index
+# # OH_cols_valid.index = test_data.index
+# #
+# # # Remove categorical columns (will replace with one-hot encoding)
+# num_X_train = train_dataset.drop(categorical_columns_names, axis=1)
+# # num_X_valid = test_data.drop(object_cols, axis=1)
+# #
+# # # Add one-hot encoded columns to numerical features
+# train_dataset = pd.concat([num_X_train, OH_cols_train], axis=1)
+# # test_data = pd.concat([num_X_valid, OH_cols_valid], axis=1)
+# print(train_dataset.head(10))
 
 # import category_encoders as ce
 
@@ -602,4 +635,18 @@ explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap val
 shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
 
 shap.summary_plot(shap_values[1], feature_vector_valid)
+print("")
+print("A SHAP value interpret the impact of having a certain value for a given feature in comparison to the prediction "
+      "we'd make if that feature took some baseline value")
+print("The summary plot combines feature importance with feature effects. Each point on the summary plot"
+      " is a Shapley value for a feature and an instance. The position on the y-axis is determined by the"
+      " feature and on the x-axis by the Shapley value. The color represents the value of the feature from "
+      "low to high. Overlapping points are jittered in y-axis direction, so we get a sense of the distribution "
+      "of the Shapley values per feature. The features are ordered according to their importance. In  other words:"
+      "the the y axis shows the feature value high value will be pink low value will be blue."
+      "the X axis shows the SHAP VALUE of the feature for each predication. the features are also ordered "
+      "in accordance with their importance. Overall we get a sense of how the feature effect on the predication,"
+      "in terms of importance overall, how high or low value have impact on the shap value."
+      "the higher the shap value the higher the improtance")
 print("summary_plot executed")
+
