@@ -21,6 +21,79 @@ import shap
 from sklearn import preprocessing
 
 
+train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)  # there is no significant difference
+# between Male and Female in order to predict target variable
+print("")
+print("imputing Gender NA Values with mode Because because most of the entries are male.")
+train_dataset['Location'].fillna(value=0, inplace=True)
+print("")
+print("imputing Location NA Values with 0 Because we rather have FN than FP.")
+# train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True) # droped
+# train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # droped
+train_dataset['Mouse_activity_1'].fillna(value=0, inplace=True) # imputing Mouse_activity NA values with 0 because we
+train_dataset['Mouse_activity_2'].fillna(value=0, inplace=True) # rather have FN than FP.
+train_dataset['Mouse_activity_3'].fillna(value=0, inplace=True)
+print("")
+print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN than FP.")
+# train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True) # droped
+train_dataset['Bought_premium'].fillna(value=0, inplace=True) # imputing Bought_premium NA Values with 0
+# Because we rather have FN than FP.
+print("")
+print("imputing Bought_premium NA Values with NO Because we rather have FN than FP.")
+
+# # feature engineering 2
+# # feature engineering for Mouse_activity_1/2/3
+# train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
+#                        "Down-Right": 0, "Down": 0, "Left-Down-Left": 0, "Down-Down-Right": 0, "Right-Up-Right":0,
+#                        "Down-Left": 0, "Right": 0, "Right-Down-Right": 0, "Up-Right": 0, "Down-Down-Left": 0,
+#                        "Up-Up-Right":0}, inplace=True)
+# print("")
+# print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left, Up-Up-Left are replaced with 1"
+#       "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+# print(train_dataset["Mouse_activity_1"].value_counts())
+# print(train_dataset["Mouse_activity_2"].value_counts())
+# print(train_dataset["Mouse_activity_3"].value_counts())
+#
+#
+# train_dataset.replace({"Nof Hagalil": 1, "Dimona": 1, "Tamra": 1, "Haifa": 1, "Akko": 1, "Migdal HaEmek ": 1, "Safed": 1,
+#                        "Kiryat Gat": 1, "Migdal HaEmek": 1, "Hadera": 1, "Maalot Tarshiha": 1, "Harish": 1, "Kiryat Motzkin": 1,
+#                        "Rehovot": 1, "Herzliya": 1, "Ramla": 1, "Beer Sheva": 1, "Hod HaSharon": 1, "Tel Aviv": 1,
+#                        "Kiryat Ono": 1, "Tiberias": 1, "Yavne": 1, "Jerusalem": 1, "Beit Shemesh": 1, "Kfar Sava": 1,
+#
+#                        "Afula": 0, "Raanana": 0,"Arad": 0,"Nes Ziona": 0,"Karmiel": 0,"Modiin": 0,"Nazareth": 0,
+#                        "Sakhnin": 0,"Ashkelon": 0, "Eilat": 0,"Beit Shean": 0,"Petah Tikva": 0,"Netanya": 0,"Shefaram": 0,
+#                        "Nahariya": 0,"Holon": 0,"Rishon Lezion": 0,"Kiryat Shemone": 0,
+#                        "Ramat Gan": 0,"Kiryat Bialik": 0,"Givatayim": 0,"Kiryat Ata": 0,"Ashdod": 0,"Yokneam": 0,
+#                        "Sderot": 0}, inplace=True)
+# print("")
+# print(train_dataset["Location"].value_counts())
+# print("transforming the Location column. Nof Hagalil, Dimona, Tamra, Haifa, Akko, Migdal HaEmek, Safed,"
+#       "Kiryat Gat, Migdal HaEmek, Hadera, Maalot Tarshiha, Harish, Kiryat Motzkin,"
+#       "Rehovot, Herzliya, Ramla, Beer Sheva, Hod HaSharon, Tel Aviv,"
+#       "Kiryat Ono, Tiberias, Yavne, Jerusalem, Beit Shemesh, Kfar Sava replaced with 1"
+#       "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+#
+# # feature engineering for Bought_premium
+# train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
+# print("")
+# print(train_dataset["Bought_premium"].value_counts())
+# print("transforming the Bought_premium columns. Yes are replaced with 1"
+#       "NO with 0. this is because the 1 values have a higher chances of positive buy")
+#
+# train_dataset.replace({"F": 1, "M": 0}, inplace=True)
+# print("")
+# print(train_dataset["Gender"].value_counts())
+# print("transforming the Gender columns. Female are replaced with 1"
+#       "Male with 0. for the model to work with")
+#
+# train_dataset.replace({"July": 1, "June": 1, "August": 1, "September": 0, "May": 0, "April": 0,
+#                        "November": 0, "March": 0, "December": 0, "October": 0, "January": 0, "February":0
+#                        }, inplace=True)
+# print("")
+# print(train_dataset["month"].value_counts())
+# print("transforming the month columns. July, June and August are replaced with 1"
+#       "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
+
 # to do list:
 # 12. use random forest information gain in order to determine which features are more important
 # 19. explainable AI - local explain
@@ -114,7 +187,6 @@ def data_exploration (train_dataset):
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
 
-
 def remove_unneeded_features(train_dataset):
     # droping features
     print("Plotting correlation matrix")
@@ -136,12 +208,12 @@ def remove_unneeded_features(train_dataset):
     print(" dropping the Time column. doesn't contribute to prediction")
     train_dataset = train_dataset.drop(columns="Dispatch_loc")  # droping the Dispatch_loc column  doesn't contribute to prediction
     print(" dropping the Dispatch_loc column. doesn't contribute to prediction")
-    # train_dataset = train_dataset.drop(columns="Mouse_activity_1")
-    # train_dataset = train_dataset.drop(columns="Mouse_activity_2")
-    # train_dataset = train_dataset.drop(columns="Mouse_activity_3")
-    # train_dataset = train_dataset.drop(columns="Location")
-    # train_dataset = train_dataset.drop(columns="month")
-    # train_dataset = train_dataset.drop(columns="Gender")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_1")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_2")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_3")
+    train_dataset = train_dataset.drop(columns="Location")
+    train_dataset = train_dataset.drop(columns="month")
+    train_dataset = train_dataset.drop(columns="Gender")
     return train_dataset
 
 
@@ -169,8 +241,6 @@ def na_handling(train_dataset):
     print("")
     print("imputing Bought_premium NA Values with 0 Because we rather have FN than FP.")
 
-    train_dataset['Gender'].fillna(0, inplace=True)
-
     # impute numeric data with median
     train_dataset['Min_prod_time'].fillna(train_dataset['Min_prod_time'].median(), inplace=True)
     train_dataset['Max_prod_time'].fillna(train_dataset['Max_prod_time'].median(), inplace=True)
@@ -196,58 +266,6 @@ def na_handling(train_dataset):
 
 
 def features_engineering(train_dataset):
-    # feature engineering 2
-    # feature engineering for Mouse_activity_1/2/3
-    train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
-                           "Down-Right": 0, "Down": 0, "Left-Down-Left": 0, "Down-Down-Right": 0, "Right-Up-Right":0,
-                           "Down-Left": 0, "Right": 0, "Right-Down-Right": 0, "Up-Right": 0, "Down-Down-Left": 0,
-                           "Up-Up-Right":0}, inplace=True)
-    print("")
-    print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left, Up-Up-Left are replaced with 1"
-          "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
-    print(train_dataset["Mouse_activity_1"].value_counts())
-    print(train_dataset["Mouse_activity_2"].value_counts())
-    print(train_dataset["Mouse_activity_3"].value_counts())
-
-
-    train_dataset.replace({"Nof Hagalil": 1, "Dimona": 1, "Tamra": 1, "Haifa": 1, "Akko": 1, "Migdal HaEmek ": 1, "Safed": 1,
-                           "Kiryat Gat": 1, "Migdal HaEmek": 1, "Hadera": 1, "Maalot Tarshiha": 1, "Harish": 1, "Kiryat Motzkin": 1,
-                           "Rehovot": 1, "Herzliya": 1, "Ramla": 1, "Beer Sheva": 1, "Hod HaSharon": 1, "Tel Aviv": 1,
-                           "Kiryat Ono": 1, "Tiberias": 1, "Yavne": 1, "Jerusalem": 1, "Beit Shemesh": 1, "Kfar Sava": 1,
-
-                           "Afula": 0, "Raanana": 0,"Arad": 0,"Nes Ziona": 0,"Karmiel": 0,"Modiin": 0,"Nazareth": 0,
-                           "Sakhnin": 0,"Ashkelon": 0, "Eilat": 0,"Beit Shean": 0,"Petah Tikva": 0,"Netanya": 0,"Shefaram": 0,
-                           "Nahariya": 0,"Holon": 0,"Rishon Lezion": 0,"Kiryat Shemone": 0,
-                           "Ramat Gan": 0,"Kiryat Bialik": 0,"Givatayim": 0,"Kiryat Ata": 0,"Ashdod": 0,"Yokneam": 0,
-                           "Sderot": 0}, inplace=True)
-    print("")
-    print(train_dataset["Location"].value_counts())
-    print("transforming the Location column. Nof Hagalil, Dimona, Tamra, Haifa, Akko, Migdal HaEmek, Safed,"
-          "Kiryat Gat, Migdal HaEmek, Hadera, Maalot Tarshiha, Harish, Kiryat Motzkin,"
-          "Rehovot, Herzliya, Ramla, Beer Sheva, Hod HaSharon, Tel Aviv,"
-          "Kiryat Ono, Tiberias, Yavne, Jerusalem, Beit Shemesh, Kfar Sava replaced with 1"
-          "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
-
-    # feature engineering for Bought_premium
-    train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
-    print("")
-    print(train_dataset["Bought_premium"].value_counts())
-    print("transforming the Bought_premium columns. Yes are replaced with 1"
-          "NO with 0. this is because the 1 values have a higher chances of positive buy")
-
-    train_dataset.replace({"F": 1, "M": 0}, inplace=True)
-    print("")
-    print(train_dataset["Gender"].value_counts())
-    print("transforming the Gender columns. Female are replaced with 1"
-          "Male with 0. for the model to work with")
-
-    train_dataset.replace({"July": 1, "June": 1, "August": 1, "September": 0, "May": 0, "April": 0,
-                           "November": 0, "March": 0, "December": 0, "October": 0, "January": 0, "February":0
-                           }, inplace=True)
-    print("")
-    print(train_dataset["month"].value_counts())
-    print("transforming the month columns. July, June and August are replaced with 1"
-          "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
 
     # feature engineering for Bought_premium
     train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
@@ -451,7 +469,7 @@ GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 
-#plotting  original correlation matrix:
+#plotting correlation matrix:
 # 0 correlation with all of the features and has no meaning.
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 
@@ -465,7 +483,7 @@ train_dataset = features_engineering(train_dataset)
 # Plotting correlation matrix after dropped some features (explain in comments)
 print("")
 print("Plotting correlation matrix after dropped some features only the numeric and undropped variables"
-      "variables that are dropped are not relevent anymore")
+      "variables that are droped are not relevent anymore")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric and undropped variables.
 
 
@@ -594,7 +612,7 @@ y_pred = model.predict(feature_vector_valid)
 pred = list()
 median = statistics.median(y_pred)
 for i in range(len(y_pred)):
-    if y_pred[i] > (median + 0.1):
+    if y_pred[i] > (median + 0.05):
        pred.append(1)
     else:
        pred.append(0)
@@ -623,7 +641,7 @@ y_pred = model.predict(feature_vector_test)
 pred = list()
 median = statistics.median(y_pred)
 for i in range(len(y_pred)):
-    if y_pred[i] > (median + 0.06):
+    if y_pred[i] > (median+0.05):
        pred.append(1)
     else:
        pred.append(0)
