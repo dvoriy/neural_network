@@ -87,37 +87,38 @@ def how_many_na_col_percentage(data):
     missing_values_count = (data.isnull().sum() * 100 / len(data))
     return missing_values_count[0:]
 
-train_dataset = pd.read_csv("ctr_dataset_train.csv")  # loading the data
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.max_rows', 500)
 
+def load_dataset(filename):
+    return pd.read_csv(filename)  # loading the data
+
+
+def data_exploration (train_dataset):
+    print(train_dataset.head(10))  # print the first 10 rows
+    print("")
+    print("Unique values in each col and count")
+    categorical_columns = ["Gender","Location","Mouse_activity_1","Mouse_activity_2","Mouse_activity_3","Dispatch_loc","Bought_premium"]
+    for column in categorical_columns:
+        print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
+
+    print("")
+    print("Data summaries")
+    for column in train_dataset:
+        print(train_dataset[column].describe(include="all", datetime_is_numeric=True))  # prints the data summaries
+
+
+    print("")
+    print("median of numeric")
+    print(train_dataset[
+              ["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+               "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes",
+               "Clothing",
+               "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+               "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
+
+
+train_dataset = load_dataset("ctr_dataset_train.csv")
 # Data Exploration
-print(train_dataset.head(10))  # print the first 10 rows
-print("")
-print("Unique values in each col and count")
-for column in train_dataset:
-    print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
-
-print("")
-print("Data summaries")
-for column in train_dataset:
-    print(train_dataset[column].describe(include="all", datetime_is_numeric=True))  # prints the data summaries
-
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-#                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-#                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-#                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
-print("")
-print("median of numeric")
-print(train_dataset[
-          ["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-           "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-           "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-           "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
+data_exploration(train_dataset)
 
 print("")
 print("Data normalization - we chose not to normalize the data because we use Random forest,"
@@ -125,18 +126,18 @@ print("Data normalization - we chose not to normalize the data because we use Ra
 
 # Data normalization - we chose not to normalize the data because we use Random forest,
 # and the model doesn't assume normalized data
-# scaler = StandardScaler()
+scaler = StandardScaler()
 # print(train_dataset.head(10))
-# num_cols = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))] # index of numric colums
-# num_cols = num_cols.drop("Buy_premium") # dropping Buy_premium from index
-# num_cols = num_cols.drop("Unnamed: 0") # dropping Unnamed: 0 from index
-# num_cols = num_cols.drop("User_ID") # dropping User_ID from index
-# print(num_cols)
-# scaler.fit(train_dataset[num_cols])
-# scaler.mean_
-# train_dataset[num_cols] = scaler.transform(train_dataset[num_cols])
-# train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
-# print(train_dataset.head(10))
+num_cols = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))] # index of numric colums
+num_cols = num_cols.drop("Buy_premium") # dropping Buy_premium from index
+num_cols = num_cols.drop("Unnamed: 0") # dropping Unnamed: 0 from index
+num_cols = num_cols.drop("User_ID") # dropping User_ID from index
+print(num_cols)
+scaler.fit(train_dataset[num_cols])
+print (scaler.mean_)
+train_dataset[num_cols] = scaler.transform(train_dataset[num_cols])
+train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
+#print(train_dataset.head(10))
 
 # Balanced data
 print("")
@@ -552,6 +553,7 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 
 
 ############################################################# Neural Network ######################################
+print("Neural Network Creation:")
 model = keras.Sequential([
         keras.layers.Dense(units=12, activation='relu'),
         keras.layers.Dense(units=1, activation='sigmoid')
@@ -561,42 +563,71 @@ model.compile(optimizer='adam',
               loss='mse',
               metrics=['accuracy'])
 
+print("Neural Network Training:")
 history = model.fit(
         feature_vector_train, target_variable_train,
-        epochs=10,
+        epochs=20,
         steps_per_epoch=50,
-        validation_steps=5
+        validation_steps=15
     )
 
-
+print("Neural Network Prediction on validation data:")
 y_pred = model.predict(feature_vector_valid)
+
 #Converting predictions to label
 pred = list()
 median = statistics.median(y_pred)
 for i in range(len(y_pred)):
-    if y_pred[i] > median:
+    if y_pred[i] > (median + 0.05):
        pred.append(1)
     else:
        pred.append(0)
 
 a = accuracy_score(pred, target_variable_valid)
-print("Accuracy is: " + str(a))
+print("Neural Network Accuracy for Validation data is: " + str(a))
 
-confusion_matrix = confusion_matrix(target_variable_valid, pred,
+confusion_matrix_neural_network_valid = confusion_matrix(target_variable_valid, pred,
                                     labels=[1, 0])  # create confusion_matrix
-print('Confusion matrix\n\n', confusion_matrix)
+print('Neural Network Confusion matrix for validation data:\n\n', confusion_matrix_neural_network_valid)
 print("TP, FN")
 print("FP, TN")
 
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_valid)  # create an onbject to display the confusion_matrix
 display.plot()
 
 print(classification_report(target_variable_valid,
                             pred))  # create classification_report of varius indicators
 
-print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
+print("Neural Network with Validation data AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
 
+print("Neural Network predict the test data")
+y_pred = model.predict(feature_vector_test)
+#print (y_pred)
+#Converting predictions to label
+pred = list()
+median = statistics.median(y_pred)
+for i in range(len(y_pred)):
+    if y_pred[i] > (median+0.05):
+       pred.append(1)
+    else:
+       pred.append(0)
 
+a = accuracy_score(pred, target_variable_test)
+print("Neural Network Accuracy for Test data is: " + str(a))
+
+confusion_matrix_neural_network_test = confusion_matrix(target_variable_test, pred,
+                                    labels=[1, 0])  # create confusion_matrix
+print('Neural network Confusion matrix for test data:\n\n', confusion_matrix_neural_network_test)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_test)  # create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_test,
+                            pred))  # create classification_report of varius indicators
+
+print("Neural Network AUC score for test data:" + str(roc_auc_score(target_variable_test, pred)))
 
 ############################################################ Random Forest #########################################
 
@@ -627,69 +658,57 @@ print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
 #
 # print("AUC score:"+str(roc_auc_score(target_variable_valid,target_variable_prediction_on_train_validation)))
 
-#
-# print("")
-# print("Random forest with 100 trees:")
-# # Model: Random forest with 100 trees # better results then 10 trees
-# cols = feature_vector_train.columns
-# scaler = RobustScaler()
-# feature_vector_train = scaler.fit_transform(feature_vector_train)
-# feature_vector_valid = scaler.transform(feature_vector_valid)
-#
-# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-#
-# rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
-# rfc.fit(feature_vector_train, target_variable_train)  # fit the model
-# target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid)  # Predict the Test set results
-# print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
-#     accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
-#
-# confusion_matrix = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation,
-#                                     labels=[1, 0])  # create confusion_matrix
-# print('Confusion matrix\n\n', confusion_matrix)
-# print("TP, FN")
-# print("FP, TN")
-#
-# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
-# display.plot()
-#
-# print(classification_report(target_variable_valid,
-#                             target_variable_prediction_on_train_validation))  # create classification_report of varius indicators
-#
-# print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+print("")
+print("Random forest with 100 trees:")
+# Model: Random forest with 100 trees # better results then 10 trees
+cols = feature_vector_train.columns
+scaler = RobustScaler()
+feature_vector_train = scaler.fit_transform(feature_vector_train)
+feature_vector_valid = scaler.transform(feature_vector_valid)
+
+feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+
+rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train)  # fit the model
+target_variable_prediction_on_train_validation = rfc.predict(feature_vector_valid)  # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+    accuracy_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
 
-# print("")
-# print("Random forest with 100 trees:")
-# # Model: Random forest with 100 trees # better results then 10 trees
-# cols = feature_vector_train.columns
-# scaler = RobustScaler()
-# feature_vector_train = scaler.fit_transform(feature_vector_train)
-# feature_vector_valid = scaler.transform(feature_vector_valid)
-#
-# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-#
-# rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
-# rfc.fit(feature_vector_train, target_variable_train)  # fit the model
-# target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
-# print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
-#     accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
-#
-# confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
-#                                     labels=[1, 0])  # create confusion_matrix
-# print('Confusion matrix\n\n', confusion_matrix)
-# print("TP, FN")
-# print("FP, TN")
-#
-# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
-# display.plot()
-#
-# print(classification_report(target_variable_test,
-#                             target_variable_prediction_on_train_test))  # create classification_report of varius indicators
-#
-# print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
+confusion_matrix_random_forest = confusion_matrix(target_variable_valid, target_variable_prediction_on_train_validation,
+                                    labels=[1, 0])  # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix_random_forest)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_random_forest)  # create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_valid,
+                            target_variable_prediction_on_train_validation))  # create classification_report of varius indicators
+
+print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
+
+
+target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+    accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
+
+confusion_matrix_random_forest_test = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
+                                    labels=[1, 0])  # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix_random_forest_test)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_random_forest_test)  # create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_test,
+                            target_variable_prediction_on_train_test))  # create classification_report of varius indicators
+
+print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
 
 # Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
 # cols = feature_vector_train.columns
