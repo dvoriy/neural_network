@@ -115,6 +115,7 @@ def data_exploration (train_dataset):
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
 
+
 def remove_unneeded_features(train_dataset):
     # droping features
     print("Plotting correlation matrix")
@@ -397,7 +398,7 @@ GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 
-#plotting correlation matrix:
+#plotting  original correlation matrix:
 # 0 correlation with all of the features and has no meaning.
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 
@@ -411,7 +412,7 @@ train_dataset = features_engineering(train_dataset)
 # Plotting correlation matrix after dropped some features (explain in comments)
 print("")
 print("Plotting correlation matrix after dropped some features only the numeric and undropped variables"
-      "variables that are droped are not relevent anymore")
+      "variables that are dropped are not relevent anymore")
 plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric and undropped variables.
 
 
@@ -540,7 +541,7 @@ y_pred = model.predict(feature_vector_valid)
 pred = list()
 median = statistics.median(y_pred)
 for i in range(len(y_pred)):
-    if y_pred[i] > (median + 0.05):
+    if y_pred[i] > (median + 0.1):
        pred.append(1)
     else:
        pred.append(0)
@@ -569,7 +570,7 @@ y_pred = model.predict(feature_vector_test)
 pred = list()
 median = statistics.median(y_pred)
 for i in range(len(y_pred)):
-    if y_pred[i] > (median+0.05):
+    if y_pred[i] > (median + 0.06):
        pred.append(1)
     else:
        pred.append(0)
