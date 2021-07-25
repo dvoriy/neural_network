@@ -20,6 +20,27 @@ from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
 from sklearn import preprocessing
 
+
+train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)  # there is no significant difference
+# between Male and Female in order to predict target variable
+print("")
+print("imputing Gender NA Values with mode Because because most of the entries are male.")
+train_dataset['Location'].fillna(value=0, inplace=True)
+print("")
+print("imputing Location NA Values with 0 Because we rather have FN than FP.")
+# train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True) # droped
+# train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # droped
+train_dataset['Mouse_activity_1'].fillna(value=0, inplace=True) # imputing Mouse_activity NA values with 0 because we
+train_dataset['Mouse_activity_2'].fillna(value=0, inplace=True) # rather have FN than FP.
+train_dataset['Mouse_activity_3'].fillna(value=0, inplace=True)
+print("")
+print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN than FP.")
+# train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True) # droped
+train_dataset['Bought_premium'].fillna(value=0, inplace=True) # imputing Bought_premium NA Values with 0
+# Because we rather have FN than FP.
+print("")
+print("imputing Bought_premium NA Values with NO Because we rather have FN than FP.")
+
 # # feature engineering 2
 # # feature engineering for Mouse_activity_1/2/3
 # train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
