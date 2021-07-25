@@ -582,6 +582,19 @@ for i in range(len(y_pred)):
 a = accuracy_score(pred, target_variable_valid)
 print("Accuracy is: " + str(a))
 
+confusion_matrix = confusion_matrix(target_variable_valid, pred,
+                                    labels=[1, 0])  # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_valid,
+                            pred))  # create classification_report of varius indicators
+
+print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
 
 
 
@@ -647,36 +660,36 @@ print("Accuracy is: " + str(a))
 # print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
 
-print("")
-print("Random forest with 100 trees:")
-# Model: Random forest with 100 trees # better results then 10 trees
-cols = feature_vector_train.columns
-scaler = RobustScaler()
-feature_vector_train = scaler.fit_transform(feature_vector_train)
-feature_vector_valid = scaler.transform(feature_vector_valid)
-
-feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-
-rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
-rfc.fit(feature_vector_train, target_variable_train)  # fit the model
-target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
-print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
-    accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
-
-confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
-                                    labels=[1, 0])  # create confusion_matrix
-print('Confusion matrix\n\n', confusion_matrix)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_test,
-                            target_variable_prediction_on_train_test))  # create classification_report of varius indicators
-
-print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
+# print("")
+# print("Random forest with 100 trees:")
+# # Model: Random forest with 100 trees # better results then 10 trees
+# cols = feature_vector_train.columns
+# scaler = RobustScaler()
+# feature_vector_train = scaler.fit_transform(feature_vector_train)
+# feature_vector_valid = scaler.transform(feature_vector_valid)
+#
+# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+#
+# rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
+# rfc.fit(feature_vector_train, target_variable_train)  # fit the model
+# target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
+# print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+#     accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
+#
+# confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
+#                                     labels=[1, 0])  # create confusion_matrix
+# print('Confusion matrix\n\n', confusion_matrix)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_test,
+#                             target_variable_prediction_on_train_test))  # create classification_report of varius indicators
+#
+# print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
 
 # Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
 # cols = feature_vector_train.columns
