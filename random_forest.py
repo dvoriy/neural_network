@@ -775,4 +775,10 @@ feature_vector_outside_test = dataset_test.drop(columns=['Buy_premium']).copy()
 
 dataset_test_Predict = rfc.predict(feature_vector_outside_test)  # Predict the Test set results
 
-print(dataset_test_Predict)
+print(dataset_test_Predict) # need to export to TXT file
+
+a_file = open("output_<3>.txt", "w")
+for row in dataset_test_Predict:
+    np.savetxt(a_file, row)
+
+a_file.close()
