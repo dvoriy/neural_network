@@ -53,6 +53,7 @@ def my_K_Means(dataset):
 
     print("Staring Kmeans")
     for i in range(1, K):
+        # creation of K KMEANS model
         kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
         kmeans.fit(X_principal)
         cs.append(kmeans.inertia_)
@@ -125,6 +126,7 @@ def my_DBSCAN(dataset):
     K=7
     labels_arr = []
     n_clusters_arr = []
+    # creating DBSCAN model
     for i in range(1, K):
         clustering = DBSCAN(eps=4.0 / i, min_samples=10, n_jobs=-1).fit(X_principal)
         core_samples_mask = np.zeros_like(clustering.labels_, dtype=bool)
