@@ -14,17 +14,13 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
 import statistics
 from sklearn.metrics import accuracy_score
-from tensorflow import keras
+# from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
 from sklearn import preprocessing
 import time
 
-
-# to do list:
-# 12. use random forest information gain in order to determine which features are more important
-# 19. explainable AI - local explain
 print("start")
 
 
@@ -528,7 +524,6 @@ print("we could use KNN to try to predict the target variable but that is risky 
 print("moreover the number we dispoed is not that big and shouln't affect the results")
 
 
-# impute categorical data
 missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
 print("")
 print("displaying Na count for each feature")
@@ -568,81 +563,81 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 
 
 ############################################################# Neural Network ######################################
-print("Neural Network Creation:")
-model = keras.Sequential([
-        keras.layers.Dense(units=12, activation='relu'),
-        keras.layers.Dense(units=1, activation='sigmoid')
-    ])
-
-model.compile(optimizer='adam',
-              loss='mse',
-              metrics=['accuracy'])
-
-print("Neural Network Training:")
-history = model.fit(
-        feature_vector_train, target_variable_train,
-        epochs=20,
-        steps_per_epoch=50,
-        validation_steps=15
-    )
-
-print("Neural Network Prediction on validation data:")
-y_pred = model.predict(feature_vector_valid)
-
-#Converting predictions to label
-pred = list()
-median = statistics.median(y_pred)
-for i in range(len(y_pred)):
-    if y_pred[i] > (median + 0.05):
-       pred.append(1)
-    else:
-       pred.append(0)
-
-a = accuracy_score(pred, target_variable_valid)
-print("Neural Network Accuracy for Validation data is: " + str(a))
-
-confusion_matrix_neural_network_valid = confusion_matrix(target_variable_valid, pred,
-                                    labels=[1, 0])  # create confusion_matrix
-print('Neural Network Confusion matrix for validation data:\n\n', confusion_matrix_neural_network_valid)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_valid)  # create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_valid,
-                            pred))  # create classification_report of varius indicators
-
-print("Neural Network with Validation data AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
-
-print("Neural Network predict the test data")
-y_pred = model.predict(feature_vector_test)
-#print (y_pred)
-#Converting predictions to label
-pred = list()
-median = statistics.median(y_pred)
-for i in range(len(y_pred)):
-    if y_pred[i] > (median+0.05):
-       pred.append(1)
-    else:
-       pred.append(0)
-
-a = accuracy_score(pred, target_variable_test)
-print("Neural Network Accuracy for Test data is: " + str(a))
-
-confusion_matrix_neural_network_test = confusion_matrix(target_variable_test, pred,
-                                    labels=[1, 0])  # create confusion_matrix
-print('Neural network Confusion matrix for test data:\n\n', confusion_matrix_neural_network_test)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_test)  # create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_test,
-                            pred))  # create classification_report of varius indicators
-
-print("Neural Network AUC score for test data:" + str(roc_auc_score(target_variable_test, pred)))
+# print("Neural Network Creation:")
+# model = keras.Sequential([
+#         keras.layers.Dense(units=12, activation='relu'),
+#         keras.layers.Dense(units=1, activation='sigmoid')
+#     ])
+#
+# model.compile(optimizer='adam',
+#               loss='mse',
+#               metrics=['accuracy'])
+#
+# print("Neural Network Training:")
+# history = model.fit(
+#         feature_vector_train, target_variable_train,
+#         epochs=20,
+#         steps_per_epoch=50,
+#         validation_steps=15
+#     )
+#
+# print("Neural Network Prediction on validation data:")
+# y_pred = model.predict(feature_vector_valid)
+#
+# #Converting predictions to label
+# pred = list()
+# median = statistics.median(y_pred)
+# for i in range(len(y_pred)):
+#     if y_pred[i] > (median + 0.05):
+#        pred.append(1)
+#     else:
+#        pred.append(0)
+#
+# a = accuracy_score(pred, target_variable_valid)
+# print("Neural Network Accuracy for Validation data is: " + str(a))
+#
+# confusion_matrix_neural_network_valid = confusion_matrix(target_variable_valid, pred,
+#                                     labels=[1, 0])  # create confusion_matrix
+# print('Neural Network Confusion matrix for validation data:\n\n', confusion_matrix_neural_network_valid)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_valid)  # create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_valid,
+#                             pred))  # create classification_report of varius indicators
+#
+# print("Neural Network with Validation data AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
+#
+# print("Neural Network predict the test data")
+# y_pred = model.predict(feature_vector_test)
+# #print (y_pred)
+# #Converting predictions to label
+# pred = list()
+# median = statistics.median(y_pred)
+# for i in range(len(y_pred)):
+#     if y_pred[i] > (median+0.05):
+#        pred.append(1)
+#     else:
+#        pred.append(0)
+#
+# a = accuracy_score(pred, target_variable_test)
+# print("Neural Network Accuracy for Test data is: " + str(a))
+#
+# confusion_matrix_neural_network_test = confusion_matrix(target_variable_test, pred,
+#                                     labels=[1, 0])  # create confusion_matrix
+# print('Neural network Confusion matrix for test data:\n\n', confusion_matrix_neural_network_test)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_neural_network_test)  # create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_test,
+#                             pred))  # create classification_report of varius indicators
+#
+# print("Neural Network AUC score for test data:" + str(roc_auc_score(target_variable_test, pred)))
 
 ############################################################ Random Forest #########################################
 
@@ -756,3 +751,28 @@ print("because we cant run the SHAP (it is too heavy) we cant also shap_plot on 
       "it pulled and how strong pulled the prediction to that direction")
 
 
+############################ prediction on test ######################
+dataset_test = load_dataset("ctr_dataset_test.csv")
+dataset_test = normalize_dataset(dataset_test)
+dataset_test = features_engineering(dataset_test)
+dataset_test = remove_unneeded_features(dataset_test)
+dataset_test[dataset_test['Idle'] < 0] = 0
+dataset_test[dataset_test['Post_premium_commercial'] < 0] = 0
+
+print("")
+print("number of lines in the data")
+print(len(dataset_test.index))  # number of lines in the data
+print("")
+print("number of na in each col")
+print(how_many_na_col(dataset_test))  # number of na in each col
+print("")
+print("percentage of na in each col")
+print(how_many_na_col_percentage(dataset_test))  # percentage of na in each col
+
+dataset_test = na_handling(dataset_test)
+
+feature_vector_outside_test = dataset_test.drop(columns=['Buy_premium']).copy()
+
+dataset_test_Predict = rfc.predict(feature_vector_outside_test)  # Predict the Test set results
+
+print(dataset_test_Predict)
