@@ -430,12 +430,12 @@ data_exploration(train_dataset)
 #Data normalization - we chose to normalize the data because we use Neural Network,
 # and the model assume normalized data
 print("")
-print("Data normalization - we chose to normalize the data because we use Neural Network,"
-      "and the model assume normalized data. Neural Network is built from logistic regression models"
-      "and logistic regression needs to get normalized data"
-      "notice that because we normalize the data the performance of the random forest are decreasing"
-      "if we won't normalized the data than random forest will be better but still the Neural Network"
-      "surpassed the random forest")
+print("Data normalization - we chose to normalize the data because we use Neural Network,")
+print("and the model assume normalized data. Neural Network is built from logistic regression models")
+print("and logistic regression needs to get normalized data")
+print("notice that because we normalize the data the performance of the random forest are decreasing")
+print("if we won't normalized the data than random forest will be better but still the Neural Network")
+print("surpassed the random forest")
 train_dataset = normalize_dataset(train_dataset)
 
 # Balanced data
@@ -638,6 +638,7 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 #                             pred))  # create classification_report of varius indicators
 #
 # print("Neural Network AUC score for test data:" + str(roc_auc_score(target_variable_test, pred)))
+print("We did hyperparameter tuning on...")
 
 ############################################################ Random Forest #########################################
 
@@ -711,6 +712,10 @@ print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_pre
 # ax.set_ylabel("Mean decrease in impurity")
 # fig.tight_layout()
 
+############### choosing ###########
+print("We chose the neural networks model because it yielded better results")
+print("it had better recall and balanced better between precision and recall as we can see with F1")
+print("also AUC of neural networks was better")
 
 
 print("We did hyperparameter tuning on the number of trees")
@@ -719,7 +724,10 @@ print("the best results were with 100 trees")
 print("the number of trees is the number of individual decision trees the random forest creates")
 print("with low numbers the more we add the better the results will be")
 print("but at a certain point the results will start to be worse due too overfitting")
-print("moreover we tried to change the number of ")
+print("moreover we tried to change the number of splits in each node")
+print("the number of generation of nodes etc those hyperparameters affect how the trees will be built")
+print("the default hyperparameters yielded best results")
+
 
 # SHAP Value
 print("")
