@@ -87,7 +87,7 @@ def my_K_Means(dataset):
     plt.bar(k, silhouette_scores)
     plt.xlabel('Number of clusters', fontsize=10)
     plt.ylabel('Silhouette Score', fontsize=10)
-    plt.title('The Silhouette score per # clusters')
+    plt.title('The Silhouette score per # clusters With K-Means')
     plt.show()
 
     print("plotting Calinski Harabasz Index Kmeans")
@@ -102,7 +102,7 @@ def my_K_Means(dataset):
     plt.bar(k, Calinski_Harabasz_Index)
     plt.xlabel('Number of clusters', fontsize=10)
     plt.ylabel('Calinski Harabasz Index ', fontsize=10)
-    plt.title('The Calinski Harabasz Index score per # clusters')
+    plt.title('The Calinski Harabasz Index score per # clusters With K-Means')
     plt.show()
 
     print("plotting davies bouldin score Kmeans")
@@ -117,39 +117,79 @@ def my_K_Means(dataset):
     plt.bar(k, davies_bouldin)
     plt.xlabel('Number of clusters', fontsize=10)
     plt.ylabel('Davies bouldin score Index ', fontsize=10)
-    plt.title('The davies bouldin score per # clusters')
+    plt.title('The davies bouldin score per # clusters With K-Means')
     plt.show()
 
 
 def my_DBSCAN(dataset):
     K=7
+    labels_arr = []
+    n_clusters_arr = []
     for i in range(1, K):
         clustering = DBSCAN(eps=4.0 / i, min_samples=10, n_jobs=-1).fit(X_principal)
         core_samples_mask = np.zeros_like(clustering.labels_, dtype=bool)
         core_samples_mask[clustering.core_sample_indices_] = True
         labels = clustering.labels_
         n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
+        labels_arr.append(labels)
+        n_clusters_arr.append(n_clusters_)
+
         n_noise_ = list(labels).count(-1)
 
     plt.scatter(X_principal['P1'], X_principal['P2'],
                 c=labels)
     plt.title('The DBSCAN Clusters')
     plt.show()
+    n_clusters_arr = n_clusters_arr[1:-2]
+    labels_arr = labels_arr[1:-2]
+    print(n_clusters_arr)
 
-    print("plotting silhouette scores DBDCAN")
+
+    print("plotting silhouette scores With DBDCAN")
     silhouette_scores = []
     k = []
-    for n_cluster in range(2, 8):
+    for n_cluster in n_clusters_arr:
         silhouette_scores.append(
-            silhouette_score(X_principal, labels))
+            silhouette_score(X_principal, labels_arr[n_clusters_arr.index(n_cluster)]))
         k.append(n_cluster)
         # Plotting a bar graph to compare the results
 
     plt.bar(k, silhouette_scores)
     plt.xlabel('Number of clusters', fontsize=10)
     plt.ylabel('Silhouette Score', fontsize=10)
-    plt.title('The Silhouette score per # clusters')
+    plt.title('The Silhouette score per # clusters With DBSCAN')
     plt.show()
+
+    print("plotting Calinski Harabasz Index DBSCAN")
+    Calinski_Harabasz_Index = []
+    k = []
+    for n_cluster in n_clusters_arr:
+        Calinski_Harabasz_Index.append(
+            calinski_harabasz_score(X_principal, labels_arr[n_clusters_arr.index(n_cluster)]))
+        k.append(n_cluster)
+        # Plotting a bar graph to compare the results
+
+    plt.bar(k, Calinski_Harabasz_Index)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Calinski Harabasz Index ', fontsize=10)
+    plt.title('The Calinski Harabasz Index score per # clusters With DBSCAN')
+    plt.show()
+
+    print("plotting davies bouldin score DBSCAN")
+    davies_bouldin = []
+    k = []
+    for n_cluster in n_clusters_arr:
+        davies_bouldin.append(
+            davies_bouldin_score(X_principal, labels_arr[n_clusters_arr.index(n_cluster)]))
+        k.append(n_cluster)
+        # Plotting a bar graph to compare the results
+
+    plt.bar(k, davies_bouldin)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Davies bouldin score Index ', fontsize=10)
+    plt.title('The davies bouldin score per # clusters With DBSCAN')
+    plt.show()
+
 
 if __name__ == '__main__':
     os.environ["OMP_NUM_THREADS"]="10"
@@ -163,6 +203,7 @@ if __name__ == '__main__':
     X_principal = pd.DataFrame(X_principal)
     X_principal.columns = ['P1', 'P2']
 
-    my_K_Means(X_principal)
     my_DBSCAN(X_principal)
+    my_K_Means(X_principal)
+
 
