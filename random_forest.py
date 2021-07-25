@@ -12,6 +12,9 @@ from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
+import statistics
+from sklearn.metrics import accuracy_score
+from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
@@ -546,6 +549,43 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 # random forest information gain feature selection
 # should probably do also before imputing the data and check if there is any different results and also after
 # a lot of things can affect the importance
+
+
+############################################################# Neural Network ######################################
+model = keras.Sequential([
+        keras.layers.Dense(units=12, activation='relu'),
+        keras.layers.Dense(units=1, activation='sigmoid')
+    ])
+
+model.compile(optimizer='adam',
+              loss='mse',
+              metrics=['accuracy'])
+
+history = model.fit(
+        feature_vector_train, target_variable_train,
+        epochs=10,
+        steps_per_epoch=50,
+        validation_steps=5
+    )
+
+
+y_pred = model.predict(feature_vector_valid)
+#Converting predictions to label
+pred = list()
+median = statistics.median(y_pred)
+for i in range(len(y_pred)):
+    if y_pred[i] > median:
+       pred.append(1)
+    else:
+       pred.append(0)
+
+a = accuracy_score(pred, target_variable_valid)
+print("Accuracy is: " + str(a))
+
+
+
+
+############################################################ Random Forest #########################################
 
 
 # Model: Random forest with 10 trees #
