@@ -87,37 +87,37 @@ def how_many_na_col_percentage(data):
     missing_values_count = (data.isnull().sum() * 100 / len(data))
     return missing_values_count[0:]
 
-train_dataset = pd.read_csv("ctr_dataset_train.csv")  # loading the data
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.max_rows', 500)
 
+def load_dataset(filename):
+    return pd.read_csv(filename)  # loading the data
+
+
+def data_exploration (train_dataset):
+    print(train_dataset.head(10))  # print the first 10 rows
+    print("")
+    print("Unique values in each col and count")
+    for column in train_dataset:
+        print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
+
+    print("")
+    print("Data summaries")
+    for column in train_dataset:
+        print(train_dataset[column].describe(include="all", datetime_is_numeric=True))  # prints the data summaries
+
+
+    print("")
+    print("median of numeric")
+    print(train_dataset[
+              ["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
+               "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes",
+               "Clothing",
+               "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
+               "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
+
+
+train_dataset = load_dataset("ctr_dataset_train.csv")
 # Data Exploration
-print(train_dataset.head(10))  # print the first 10 rows
-print("")
-print("Unique values in each col and count")
-for column in train_dataset:
-    print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
-
-print("")
-print("Data summaries")
-for column in train_dataset:
-    print(train_dataset[column].describe(include="all", datetime_is_numeric=True))  # prints the data summaries
-
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-#                "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-#                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-#                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].describe(include="all", datetime_is_numeric=True)) # show the dataset 5 statistics
-print("")
-print("median of numeric")
-print(train_dataset[
-          ["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-           "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-           "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-           "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
-# print(train_dataset[["Gender", "Location", "Date", "Time", "Min_prod_time", "Max_prod_time", "Commercial_1", "Commercial_2",
-# "Commercial_3", "Mouse_activity_1", "Mouse_activity_2", "Mouse_activity_3", "Jewelry", "Shoes", "Clothing",
-# "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
-# "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].mode()) # shows mode
+data_exploration(train_dataset)
 
 print("")
 print("Data normalization - we chose not to normalize the data because we use Random forest,"
@@ -563,9 +563,9 @@ model.compile(optimizer='adam',
 
 history = model.fit(
         feature_vector_train, target_variable_train,
-        epochs=10,
+        epochs=20,
         steps_per_epoch=50,
-        validation_steps=5
+        validation_steps=15
     )
 
 
