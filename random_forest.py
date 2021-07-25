@@ -14,7 +14,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import roc_auc_score
 import statistics
 from sklearn.metrics import accuracy_score
-from tensorflow import keras
+# from tensorflow import keras
 from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
@@ -94,9 +94,17 @@ pd.set_option('display.max_rows', 500)
 # Data Exploration
 print(train_dataset.head(10))  # print the first 10 rows
 print("")
-print("Unique values in each col and count")
-for column in train_dataset:
-    print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
+print("Unique values in each categorical col and count")
+# for column in train_dataset:
+#     print(train_dataset[column].value_counts())  # prints the unique values in each col and counts them
+print(train_dataset["Gender"].value_counts())
+print(train_dataset["Location"].value_counts())
+print(train_dataset["Mouse_activity_1"].value_counts())
+print(train_dataset["Mouse_activity_2"].value_counts())
+print(train_dataset["Mouse_activity_3"].value_counts())
+print(train_dataset["Dispatch_loc"].value_counts())
+print(train_dataset["Bought_premium"].value_counts())
+
 
 print("")
 print("Data summaries")
@@ -552,49 +560,49 @@ print(feature_vector_test.shape), print(target_variable_test.shape)
 
 
 ############################################################# Neural Network ######################################
-model = keras.Sequential([
-        keras.layers.Dense(units=12, activation='relu'),
-        keras.layers.Dense(units=1, activation='sigmoid')
-    ])
-
-model.compile(optimizer='adam',
-              loss='mse',
-              metrics=['accuracy'])
-
-history = model.fit(
-        feature_vector_train, target_variable_train,
-        epochs=10,
-        steps_per_epoch=50,
-        validation_steps=5
-    )
-
-
-y_pred = model.predict(feature_vector_valid)
-#Converting predictions to label
-pred = list()
-median = statistics.median(y_pred)
-for i in range(len(y_pred)):
-    if y_pred[i] > median:
-       pred.append(1)
-    else:
-       pred.append(0)
-
-a = accuracy_score(pred, target_variable_valid)
-print("Accuracy is: " + str(a))
-
-confusion_matrix = confusion_matrix(target_variable_valid, pred,
-                                    labels=[1, 0])  # create confusion_matrix
-print('Confusion matrix\n\n', confusion_matrix)
-print("TP, FN")
-print("FP, TN")
-
-display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
-display.plot()
-
-print(classification_report(target_variable_valid,
-                            pred))  # create classification_report of varius indicators
-
-print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
+# model = keras.Sequential([
+#         keras.layers.Dense(units=12, activation='relu'),
+#         keras.layers.Dense(units=1, activation='sigmoid')
+#     ])
+#
+# model.compile(optimizer='adam',
+#               loss='mse',
+#               metrics=['accuracy'])
+#
+# history = model.fit(
+#         feature_vector_train, target_variable_train,
+#         epochs=10,
+#         steps_per_epoch=50,
+#         validation_steps=5
+#     )
+#
+#
+# y_pred = model.predict(feature_vector_valid)
+# #Converting predictions to label
+# pred = list()
+# median = statistics.median(y_pred)
+# for i in range(len(y_pred)):
+#     if y_pred[i] > median:
+#        pred.append(1)
+#     else:
+#        pred.append(0)
+#
+# a = accuracy_score(pred, target_variable_valid)
+# print("Accuracy is: " + str(a))
+#
+# confusion_matrix = confusion_matrix(target_variable_valid, pred,
+#                                     labels=[1, 0])  # create confusion_matrix
+# print('Confusion matrix\n\n', confusion_matrix)
+# print("TP, FN")
+# print("FP, TN")
+#
+# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+# display.plot()
+#
+# print(classification_report(target_variable_valid,
+#                             pred))  # create classification_report of varius indicators
+#
+# print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
 
 
 
@@ -660,36 +668,36 @@ print("AUC score:" + str(roc_auc_score(target_variable_valid, pred)))
 # print("AUC score:" + str(roc_auc_score(target_variable_valid, target_variable_prediction_on_train_validation)))
 
 
-# print("")
-# print("Random forest with 100 trees:")
-# # Model: Random forest with 100 trees # better results then 10 trees
-# cols = feature_vector_train.columns
-# scaler = RobustScaler()
-# feature_vector_train = scaler.fit_transform(feature_vector_train)
-# feature_vector_valid = scaler.transform(feature_vector_valid)
-#
-# feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
-# feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
-#
-# rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
-# rfc.fit(feature_vector_train, target_variable_train)  # fit the model
-# target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
-# print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
-#     accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
-#
-# confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
-#                                     labels=[1, 0])  # create confusion_matrix
-# print('Confusion matrix\n\n', confusion_matrix)
-# print("TP, FN")
-# print("FP, TN")
-#
-# display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
-# display.plot()
-#
-# print(classification_report(target_variable_test,
-#                             target_variable_prediction_on_train_test))  # create classification_report of varius indicators
-#
-# print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
+print("")
+print("Random forest with 100 trees:")
+# Model: Random forest with 100 trees # better results then 10 trees
+cols = feature_vector_train.columns
+scaler = RobustScaler()
+feature_vector_train = scaler.fit_transform(feature_vector_train)
+feature_vector_valid = scaler.transform(feature_vector_valid)
+
+feature_vector_train = pd.DataFrame(feature_vector_train, columns=[cols])
+feature_vector_valid = pd.DataFrame(feature_vector_valid, columns=[cols])
+
+rfc = RandomForestClassifier(n_estimators=100, random_state=0)  # instantiate the classifier
+rfc.fit(feature_vector_train, target_variable_train)  # fit the model
+target_variable_prediction_on_train_test = rfc.predict(feature_vector_test)  # Predict the Test set results
+print('Model accuracy score with 100 decision-trees : {0:0.4f}'.format(
+    accuracy_score(target_variable_test, target_variable_prediction_on_train_test)))
+
+confusion_matrix = confusion_matrix(target_variable_test, target_variable_prediction_on_train_test,
+                                    labels=[1, 0])  # create confusion_matrix
+print('Confusion matrix\n\n', confusion_matrix)
+print("TP, FN")
+print("FP, TN")
+
+display = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix)  # create an onbject to display the confusion_matrix
+display.plot()
+
+print(classification_report(target_variable_test,
+                            target_variable_prediction_on_train_test))  # create classification_report of varius indicators
+
+print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
 
 # Model: Random forest with 200 trees # # the results are not as good as 100 trees and risk of over fitting
 # cols = feature_vector_train.columns
