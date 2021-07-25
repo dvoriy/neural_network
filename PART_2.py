@@ -5,13 +5,53 @@ import pandas as pd
 import numpy as np
 import os
 from sklearn.decomposition import PCA
-from sklearn.metrics import silhouette_score
+from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 
+
+# we don't know the true label of the clustring so we need to use internal Validity Measures:
+# https://scikit-learn.org/stable/modules/clustering.html#clustering-performance-evaluation
+
+######################## Silhouette Coefficient################################
+# Advantages
+# The score is bounded between -1 for incorrect clustering and +1
+# for highly dense clustering. Scores around zero indicate overlapping clusters.
+#
+# The score is higher when clusters are dense and well separated, which relates
+# to a standard concept of a cluster.
+
+# Drawbacks
+# The Silhouette Coefficient is generally higher for convex clusters than other
+# concepts of clusters, such as density based clusters like those obtained through DBSCAN.
+
+
+##################### Calinski-Harabasz Index ################################
+# Advantages
+# The score is higher when clusters are dense and well separated, which
+# relates to a standard concept of a cluster.
+#
+# The score is fast to compute.
+
+# Drawbacks
+# The Calinski-Harabasz index is generally higher for convex clusters
+# than other concepts of clusters, such as density based clusters like those obtained through DBSCAN.
+
+######################  Davies-Bouldin Index #########################################
+#  Advantages
+# The computation of Davies-Bouldin is simpler than that of Silhouette scores.
+#
+# The index is computed only quantities and features inherent to the dataset.
+#
+# Drawbacks
+# The Davies-Boulding index is generally higher for convex clusters
+# than other concepts of clusters, such as density based clusters like those obtained from DBSCAN.
+
+# The usage of centroid distance limits the distance metric to Euclidean space.
 
 def my_K_Means(dataset):
     cs = []
     results = []
 
+    print("Staring Kmeans")
     for i in range(1, K):
         kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
         kmeans.fit(X_principal)
@@ -24,6 +64,7 @@ def my_K_Means(dataset):
             best_num_of_clusters = i + 1
             break
 
+    print("plotting Elbow Method Kmeans")
     plt.plot(range(1, K), cs)
     plt.title('The Elbow Method')
     plt.xlabel('Number of clusters')
@@ -34,6 +75,7 @@ def my_K_Means(dataset):
     plt.title('The K-Means clusters')
     plt.show()
 
+    print("plotting silhouette scores Kmeans")
     silhouette_scores = []
     k = []
     for n_cluster in range(2, 8):
@@ -46,6 +88,36 @@ def my_K_Means(dataset):
     plt.xlabel('Number of clusters', fontsize=10)
     plt.ylabel('Silhouette Score', fontsize=10)
     plt.title('The Silhouette score per # clusters')
+    plt.show()
+
+    print("plotting Calinski Harabasz Index Kmeans")
+    Calinski_Harabasz_Index = []
+    k = []
+    for n_cluster in range(2, 8):
+        Calinski_Harabasz_Index.append(
+            calinski_harabasz_score(X_principal, KMeans(n_clusters=n_cluster).fit_predict(X_principal)))
+        k.append(n_cluster)
+        # Plotting a bar graph to compare the results
+
+    plt.bar(k, Calinski_Harabasz_Index)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Calinski Harabasz Index ', fontsize=10)
+    plt.title('The Calinski Harabasz Index score per # clusters')
+    plt.show()
+
+    print("plotting davies bouldin score Kmeans")
+    davies_bouldin = []
+    k = []
+    for n_cluster in range(2, 8):
+        davies_bouldin.append(
+            davies_bouldin_score(X_principal, KMeans(n_clusters=n_cluster).fit_predict(X_principal)))
+        k.append(n_cluster)
+        # Plotting a bar graph to compare the results
+
+    plt.bar(k, davies_bouldin)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Davies bouldin score Index ', fontsize=10)
+    plt.title('The davies bouldin score per # clusters')
     plt.show()
 
 
@@ -64,6 +136,20 @@ def my_DBSCAN(dataset):
     plt.title('The DBSCAN Clusters')
     plt.show()
 
+    print("plotting silhouette scores DBDCAN")
+    silhouette_scores = []
+    k = []
+    for n_cluster in range(2, 8):
+        silhouette_scores.append(
+            silhouette_score(X_principal, labels))
+        k.append(n_cluster)
+        # Plotting a bar graph to compare the results
+
+    plt.bar(k, silhouette_scores)
+    plt.xlabel('Number of clusters', fontsize=10)
+    plt.ylabel('Silhouette Score', fontsize=10)
+    plt.title('The Silhouette score per # clusters')
+    plt.show()
 
 if __name__ == '__main__':
     os.environ["OMP_NUM_THREADS"]="10"
