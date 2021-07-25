@@ -1,5 +1,5 @@
 # Final Project TAU neural networks.
-# By Roi & Yossi D
+# By Roi Yaacovi 206044844 & Yossi Dvori 021784665
 import pandas as pd
 import seaborn as sb
 import matplotlib.pyplot as mp
@@ -19,40 +19,14 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.over_sampling import SMOTE, SMOTENC
 import shap
 from sklearn import preprocessing
+import time
 
 
 # to do list:
 # 12. use random forest information gain in order to determine which features are more important
 # 19. explainable AI - local explain
-# 20. maybe add a variable that combines shoes clothing and jewlry etc - they have high cor with target variable
 print("start")
 
-# done:
-# 1. split the data: train 70%; validation 15%; test 10%
-# 2. determine which col if any have to many NA values and therefore are unnecessary
-#    meaning that that we leave a feature outside
-#    create a function
-# 3. determine which rows if any have to many NA values and therefore are unnecessary
-#    meaning that that we leave an client outside
-#    create a function
-# 4. determine how to handle NA values and write a function
-# 5. clean the data - look for negative values etc and decided what to do Post_premium_commercial Idle
-# 6. we need to add one summery statistic to non-numeric variables
-# 7. maybe create a function for the location feature. map the locations, organize each town to an area: north, south
-#    center or by socioeconomic scale.
-# 8. create from the timestamp feature i.e. year, month, day of the week
-# 9. create from the time feature a morning noon evening night feature
-# 10. normalize the data
-# 11. balance the data - cant run it - we chose not to
-# 13. create confusion matrix and valuation indicators: precision, recall, accuracy, auc
-# 14. integrate mode and median in the summery
-# 15. determine buy_premium as target variable
-# 17. day + month that has a lot of premium create list and if it is one of them create a col of y0 or 1
-# 18. train NN
-# 21. we can encode the categorical data which means that if we have for example a variable with 3 catgories
-# small medium and big than we will get 3 columns: small medium and big.
-# in the small column there will be a 1 where the row was small and zero if it was medium or big.
-# 22. explain why I imputed each feature and why I chose the way I chose
 
 def plot_cor_matrix(data):
     """receives data and plot a heat map of the correlation matrix and a table of the unique features correlation
@@ -453,12 +427,19 @@ train_dataset = load_dataset("ctr_dataset_train.csv")
 # Data Exploration
 data_exploration(train_dataset)
 
-print("")
-print("Data normalization - we chose not to normalize the data because we use Random forest,"
-      "and the model doesn't assume normalized data")
+# print("")
+# print("Data normalization - we chose not to normalize the data because we use Random forest,"
+#       "and the model doesn't assume normalized data")
 
-# Data normalization - we chose  to normalize the data because we use Neural Network,
+#Data normalization - we chose to normalize the data because we use Neural Network,
 # and the model assume normalized data
+print("")
+print("Data normalization - we chose to normalize the data because we use Neural Network,"
+      "and the model assume normalized data. Neural Network is built from logistic regression models"
+      "and logistic regression needs to get normalized data"
+      "notice that because we normalize the data the performance of the random forest are decreasing"
+      "if we won't normalized the data than random forest will be better but still the Neural Network"
+      "surpassed the random forest")
 train_dataset = normalize_dataset(train_dataset)
 
 # Balanced data
@@ -474,8 +455,7 @@ print("not as good in prediction on the minority data")
 explore_cat_vals(train_dataset)
 
 #plotting correlation matrix:
-# 0 correlation with all of the features and has no meaning.
-plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
+plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric
 
 ###################### feature engineering ######################
 train_dataset = features_engineering(train_dataset)
@@ -487,7 +467,7 @@ date_exploration(train_dataset)
 train_dataset = remove_unneeded_features(train_dataset)
 
 
-# Plotting correlation matrix after dropped some features (explain in comments)
+# Plotting correlation matrix after dropped features
 print("")
 print("Plotting correlation matrix after dropped some features only the numeric and undropped variables"
       "variables that are droped are not relevent anymore")
@@ -718,6 +698,23 @@ print(classification_report(target_variable_test,
 
 print("AUC score:" + str(roc_auc_score(target_variable_test, target_variable_prediction_on_train_test)))
 
+# importance
+# feature_names = [f'feature {i}' for i in range(feature_vector_train.shape[1])]
+# start_time = time.time()
+# importances = rfc.feature_importances_
+# std = np.std([
+#     tree.feature_importances_ for tree in rfc.estimators_], axis=0)
+# elapsed_time = time.time() - start_time
+#
+# print(f"Elapsed time to compute the importances: "
+#       f"{elapsed_time:.3f} seconds")
+# forest_importances = pd.Series(importances, index=feature_names)
+#
+# fig, ax = mp.subplots()
+# forest_importances.plot.bar(yerr=std, ax=ax)
+# ax.set_title("Feature importances using MDI")
+# ax.set_ylabel("Mean decrease in impurity")
+# fig.tight_layout()
 
 
 
@@ -727,14 +724,18 @@ print("the best results were with 100 trees")
 print("the number of trees is the number of individual decision trees the random forest creates")
 print("with low numbers the more we add the better the results will be")
 print("but at a certain point the results will start to be worse due too overfitting")
+print("moreover we tried to change the number of ")
 
 # SHAP Value
 print("")
-explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap values
+# explainer = shap.TreeExplainer(rfc)  # Create object that can calculate shap values
+# explainer = shap.KernelExplainer(model)  # Create object that can calculate shap values
 print("explainer check")
-shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
+# shap_values = explainer.shap_values(feature_vector_valid)  # Calculate Shap values
 print("shap_values check")
-shap.summary_plot(shap_values[1], feature_vector_valid)
+print("The SHAP TreeExplainer was too heavy for us too run so"
+      "we explain below as instructed in the model")
+# shap.summary_plot(shap_values[1], feature_vector_valid)
 print("")
 print("A SHAP value interpret the impact of having a certain value for a given feature in comparison to the prediction "
       "we'd make if that feature took some baseline value")
@@ -747,7 +748,11 @@ print("The summary plot combines feature importance with feature effects. Each p
       "the X axis shows the SHAP VALUE of the feature for each predication. the features are also ordered "
       "in accordance with their importance. Overall we get a sense of how the feature effect on the predication,"
       "in terms of importance overall, how high or low value have impact on the shap value."
-      "the higher the shap value the higher the improtance")
+      "the higher the shap value the higher the importance")
 print("summary_plot executed")
+print("because we cant run the SHAP (it is too heavy) we cant also shap_plot on the raffled data"
+      "but if we could than we could see how each feature contributed too the specific prediction"
+      "we could see if the value of the feature was low or high and to which direction of the prediction"
+      "it pulled and how strong pulled the prediction to that direction")
 
 
