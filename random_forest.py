@@ -65,7 +65,7 @@ def plot_cor_matrix(data):
     sorted_mat = correlation_matrix.unstack().sort_values()
     # Retain upper triangular values of correlation matrix and
     # make Lower triangular values Null
-    upper_corr_mat = correlation_matrix.where(np.triu(np.ones(correlation_matrix.shape), k=1).astype(np.bool))
+    upper_corr_mat = correlation_matrix.where(np.triu(np.ones(correlation_matrix.shape), k=1).astype(bool))
     # Convert to 1-D series and drop Null values
     unique_corr_pairs = upper_corr_mat.unstack().dropna()
     # Sort correlation pairs
@@ -115,6 +115,96 @@ def data_exploration (train_dataset):
                "Home", "Premium", "Premium_commercial_play", "Idle", "Post_premium_commercial", "Size_variations",
                "Color_variations", "Dispatch_loc", "Bought_premium", "Buy_premium"]].median())  # shows median
 
+def remove_unneeded_features(train_dataset):
+    # droping features
+    print("Plotting correlation matrix")
+    train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
+
+    print("dropping the user_Id column.  has no meaning.")
+    train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
+    # it seems that it comes from the csv numbering
+
+    print("dropping the Unnamed: 0 column. 0 correlation with all of the features, it seems that it comes from the csv numbering")
+    train_dataset = train_dataset.drop(columns="Date")  # droping the date column  doesn't contribute to prediction
+    # moreover we create based on him other columns
+    print(" dropping the Date column. doesn't contribute moreover we create based on him other columns")
+    train_dataset = train_dataset.drop(columns="day")  # droping the date column  doesn't contribute to prediction
+    print(" dropping the day column. doesn't contribute to prediction")
+    train_dataset = train_dataset.drop(columns="day of year")  # droping the day of year column  doesn't contribute to prediction
+    print(" dropping the day of year column. doesn't contribute to prediction")
+    train_dataset = train_dataset.drop(columns="Time")  # droping the Time column  doesn't contribute to prediction
+    print(" dropping the Time column. doesn't contribute to prediction")
+    train_dataset = train_dataset.drop(columns="Dispatch_loc")  # droping the Dispatch_loc column  doesn't contribute to prediction
+    print(" dropping the Dispatch_loc column. doesn't contribute to prediction")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_1")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_2")
+    train_dataset = train_dataset.drop(columns="Mouse_activity_3")
+    train_dataset = train_dataset.drop(columns="Location")
+    train_dataset = train_dataset.drop(columns="month")
+    train_dataset = train_dataset.drop(columns="Gender")
+    return train_dataset
+
+
+def normalize_dataset(train_dataset):
+    scaler = StandardScaler()
+    # print(train_dataset.head(10))
+    num_cols = train_dataset.columns[
+        train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))]  # index of numric colums
+    num_cols = num_cols.drop("Buy_premium")  # dropping Buy_premium from index
+    num_cols = num_cols.drop("Unnamed: 0")  # dropping Unnamed: 0 from index
+    num_cols = num_cols.drop("User_ID")  # dropping User_ID from index
+    print(num_cols)
+    scaler.fit(train_dataset[num_cols])
+    print(scaler.mean_)
+    train_dataset[num_cols] = scaler.transform(train_dataset[num_cols])
+    return pd.DataFrame(train_dataset)
+
+
+def na_handling(train_dataset):
+    # between Male and Female in order to predict target variable
+
+    # train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True) # droped
+    train_dataset['Bought_premium'].fillna(value=0, inplace=True)  # imputing Bought_premium NA Values with 0
+    # Because we rather have FN than FP.
+    print("")
+    print("imputing Bought_premium NA Values with 0 Because we rather have FN than FP.")
+
+    # impute numeric data with median
+    train_dataset['Min_prod_time'].fillna(train_dataset['Min_prod_time'].median(), inplace=True)
+    train_dataset['Max_prod_time'].fillna(train_dataset['Max_prod_time'].median(), inplace=True)
+    train_dataset['Commercial_1'].fillna(train_dataset['Commercial_1'].median(), inplace=True)
+    train_dataset['Commercial_2'].fillna(train_dataset['Commercial_2'].median(), inplace=True)
+    train_dataset['Commercial_3'].fillna(train_dataset['Commercial_3'].median(), inplace=True)
+    train_dataset['Jewelry'].fillna(train_dataset['Jewelry'].median(), inplace=True)
+    train_dataset['Shoes'].fillna(train_dataset['Shoes'].median(), inplace=True)
+    train_dataset['Clothing'].fillna(train_dataset['Clothing'].median(), inplace=True)
+    train_dataset['Home'].fillna(train_dataset['Home'].median(), inplace=True)
+    train_dataset['Premium'].fillna(train_dataset['Premium'].median(), inplace=True)
+    train_dataset['Idle'].fillna(train_dataset['Idle'].median(), inplace=True)
+    train_dataset['Post_premium_commercial'].fillna(train_dataset['Post_premium_commercial'].median(), inplace=True)
+    train_dataset['Premium_commercial_play'].fillna(train_dataset['Premium_commercial_play'].median(), inplace=True)
+    train_dataset['Size_variations'].fillna(train_dataset['Size_variations'].median(), inplace=True)
+    train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].median(), inplace=True)
+
+    missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
+    print("")
+    print("displaying Na count for each feature after NA handling")
+    print(missing_values_count)
+    return train_dataset
+
+
+def features_engineering(train_dataset):
+
+    # feature engineering for Bought_premium
+    train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
+    print("")
+    print(train_dataset["Bought_premium"].value_counts())
+    print("transforming the Bought_premium columns. Yes are replaced with 1"
+          "NO with 0. this is because the 1 values have a higher chances of positive buy")
+
+    return train_dataset
+
+########################################## MAIN ###########################################
 
 train_dataset = load_dataset("ctr_dataset_train.csv")
 # Data Exploration
@@ -124,20 +214,9 @@ print("")
 print("Data normalization - we chose not to normalize the data because we use Random forest,"
       "and the model doesn't assume normalized data")
 
-# Data normalization - we chose not to normalize the data because we use Random forest,
-# and the model doesn't assume normalized data
-scaler = StandardScaler()
-# print(train_dataset.head(10))
-num_cols = train_dataset.columns[train_dataset.dtypes.apply(lambda c: np.issubdtype(c, np.number))] # index of numric colums
-num_cols = num_cols.drop("Buy_premium") # dropping Buy_premium from index
-num_cols = num_cols.drop("Unnamed: 0") # dropping Unnamed: 0 from index
-num_cols = num_cols.drop("User_ID") # dropping User_ID from index
-print(num_cols)
-scaler.fit(train_dataset[num_cols])
-print (scaler.mean_)
-train_dataset[num_cols] = scaler.transform(train_dataset[num_cols])
-train_dataset = pd.DataFrame(train_dataset)#, columns=train_dataset.columns
-#print(train_dataset.head(10))
+# Data normalization - we chose  to normalize the data because we use Neural Network,
+# and the model assume normalized data
+train_dataset = normalize_dataset(train_dataset)
 
 # Balanced data
 print("")
@@ -318,87 +397,16 @@ GSL["percentage"] = GSL["Buy_premium"] / GSL["How many"]
 print(GSL.sort_values(by="percentage"))
 
 
-# droping features
-print("")
-print("Plotting correlation matrix")
-plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
-train_dataset = train_dataset.drop(columns="User_ID")  # dropping the user_Id column.
+#plotting correlation matrix:
 # 0 correlation with all of the features and has no meaning.
-print("")
-print("dropping the user_Id column.  has no meaning.")
-train_dataset = train_dataset.drop(columns="Unnamed: 0")  # dropping the Unnamed: 0 column.
-# it seems that it comes from the csv numbering
-print("")
-print(" dropping the Unnamed: 0 column. 0 correlation with all of the features, it seems that it comes from the csv numbering")
-train_dataset = train_dataset.drop(columns="Date") # droping the date column  doesn't contribute to prediction
-# moreover we create based on him other columns
-print("")
-print(" dropping the Date column. doesn't contribute moreover we create based on him other columns")
-train_dataset = train_dataset.drop(columns="day") # droping the date column  doesn't contribute to prediction
-print("")
-print(" dropping the day column. doesn't contribute to prediction")
-train_dataset = train_dataset.drop(columns="day of year") # droping the day of year column  doesn't contribute to prediction
-print("")
-print(" dropping the day of year column. doesn't contribute to prediction")
-train_dataset = train_dataset.drop(columns="Time") # droping the Time column  doesn't contribute to prediction
-print("")
-print(" dropping the Time column. doesn't contribute to prediction")
-train_dataset = train_dataset.drop(columns="Dispatch_loc")# droping the Dispatch_loc column  doesn't contribute to prediction
-print("")
-print(" dropping the Dispatch_loc column. doesn't contribute to prediction")
+plot_cor_matrix(train_dataset)  # creating cor mat for only the numeric categorical d
 
-# feature engineering 2
-# feature engineering for Mouse_activity_1/2/3
-train_dataset.replace({"Up": 1, "Left": 1, "Left-Up-Left": 1, "Up-Left": 1, "Up-Up-Left": 1,
-                       "Down-Right": 0, "Down": 0, "Left-Down-Left": 0, "Down-Down-Right": 0, "Right-Up-Right":0,
-                       "Down-Left": 0, "Right": 0, "Right-Down-Right": 0, "Up-Right": 0, "Down-Down-Left": 0,
-                       "Up-Up-Right":0}, inplace=True)
-print("")
-print("transforming the Mouse_activity columns. Up, Left, Left-Up-Left, Up-Left, Up-Up-Left are replaced with 1"
-      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
-print(train_dataset["Mouse_activity_1"].value_counts())
-print(train_dataset["Mouse_activity_2"].value_counts())
-print(train_dataset["Mouse_activity_3"].value_counts())
+##################### remove features ###########################
+train_dataset = remove_unneeded_features(train_dataset)
 
+###################### feature engineering ######################
+train_dataset = features_engineering(train_dataset)
 
-train_dataset.replace({"Nof Hagalil": 1, "Dimona": 1, "Tamra": 1, "Haifa": 1, "Akko": 1, "Migdal HaEmek ": 1, "Safed": 1,
-                       "Kiryat Gat": 1, "Migdal HaEmek": 1, "Hadera": 1, "Maalot Tarshiha": 1, "Harish": 1, "Kiryat Motzkin": 1,
-                       "Rehovot": 1, "Herzliya": 1, "Ramla": 1, "Beer Sheva": 1, "Hod HaSharon": 1, "Tel Aviv": 1,
-                       "Kiryat Ono": 1, "Tiberias": 1, "Yavne": 1, "Jerusalem": 1, "Beit Shemesh": 1, "Kfar Sava": 1,
-
-                       "Afula": 0, "Raanana": 0,"Arad": 0,"Nes Ziona": 0,"Karmiel": 0,"Modiin": 0,"Nazareth": 0,
-                       "Sakhnin": 0,"Ashkelon": 0, "Eilat": 0,"Beit Shean": 0,"Petah Tikva": 0,"Netanya": 0,"Shefaram": 0,
-                       "Nahariya": 0,"Holon": 0,"Rishon Lezion": 0,"Kiryat Shemone": 0,
-                       "Ramat Gan": 0,"Kiryat Bialik": 0,"Givatayim": 0,"Kiryat Ata": 0,"Ashdod": 0,"Yokneam": 0,
-                       "Sderot": 0}, inplace=True)
-print("")
-print(train_dataset["Location"].value_counts())
-print("transforming the Location column. Nof Hagalil, Dimona, Tamra, Haifa, Akko, Migdal HaEmek, Safed,"
-      "Kiryat Gat, Migdal HaEmek, Hadera, Maalot Tarshiha, Harish, Kiryat Motzkin,"
-      "Rehovot, Herzliya, Ramla, Beer Sheva, Hod HaSharon, Tel Aviv,"
-      "Kiryat Ono, Tiberias, Yavne, Jerusalem, Beit Shemesh, Kfar Sava replaced with 1"
-      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
-
-# feature engineering for Bought_premium
-train_dataset.replace({"Yes": 1, "No": 0}, inplace=True)
-print("")
-print(train_dataset["Bought_premium"].value_counts())
-print("transforming the Bought_premium columns. Yes are replaced with 1"
-      "NO with 0. this is because the 1 values have a higher chances of positive buy")
-
-train_dataset.replace({"F": 1, "M": 0}, inplace=True)
-print("")
-print(train_dataset["Gender"].value_counts())
-print("transforming the Gender columns. Female are replaced with 1"
-      "Male with 0. for the model to work with")
-
-train_dataset.replace({"July": 1, "June": 1, "August": 1, "September": 0, "May": 0, "April": 0,
-                       "November": 0, "March": 0, "December": 0, "October": 0, "January": 0, "February":0
-                       }, inplace=True)
-print("")
-print(train_dataset["month"].value_counts())
-print("transforming the month columns. July, June and August are replaced with 1"
-      "the rest replaced with 0. this is because the 1 values have a higher chances of positive buy")
 
 # Plotting correlation matrix after dropped some features (explain in comments)
 print("")
@@ -473,48 +481,9 @@ print("")
 print("displaying Na count for each feature")
 print(missing_values_count)
 
-train_dataset['Gender'].fillna(train_dataset['Gender'].mode()[0], inplace=True)  # there is no significant difference
-# between Male and Female in order to predict target variable
-print("")
-print("imputing Gender NA Values with mode Because because most of the entries are male.")
-train_dataset['Location'].fillna(value=0, inplace=True)
-print("")
-print("imputing Location NA Values with 0 Because we rather have FN than FP.")
-# train_dataset['Time'].fillna(train_dataset['Time'].mode()[0], inplace=True) # droped
-# train_dataset['Date'].fillna(train_dataset['Date'].mode()[0], inplace=True) # droped
-train_dataset['Mouse_activity_1'].fillna(value=0, inplace=True) # imputing Mouse_activity NA values with 0 because we
-train_dataset['Mouse_activity_2'].fillna(value=0, inplace=True) # rather have FN than FP.
-train_dataset['Mouse_activity_3'].fillna(value=0, inplace=True)
-print("")
-print("imputing Mouse_activity_1/2/3 NA Values with 0 Because we rather have FN than FP.")
-# train_dataset['Dispatch_loc'].fillna(train_dataset['Dispatch_loc'].mode()[0], inplace=True) # droped
-train_dataset['Bought_premium'].fillna(value=0, inplace=True) # imputing Bought_premium NA Values with 0
-# Because we rather have FN than FP.
-print("")
-print("imputing Bought_premium NA Values with 0 Because we rather have FN than FP.")
 
-
-# impute numeric data with median
-train_dataset['Min_prod_time'].fillna(train_dataset['Min_prod_time'].median(), inplace=True)
-train_dataset['Max_prod_time'].fillna(train_dataset['Max_prod_time'].median(), inplace=True)
-train_dataset['Commercial_1'].fillna(train_dataset['Commercial_1'].median(), inplace=True)
-train_dataset['Commercial_2'].fillna(train_dataset['Commercial_2'].median(), inplace=True)
-train_dataset['Commercial_3'].fillna(train_dataset['Commercial_3'].median(), inplace=True)
-train_dataset['Jewelry'].fillna(train_dataset['Jewelry'].median(), inplace=True)
-train_dataset['Shoes'].fillna(train_dataset['Shoes'].median(), inplace=True)
-train_dataset['Clothing'].fillna(train_dataset['Clothing'].median(), inplace=True)
-train_dataset['Home'].fillna(train_dataset['Home'].median(), inplace=True)
-train_dataset['Premium'].fillna(train_dataset['Premium'].median(), inplace=True)
-train_dataset['Idle'].fillna(train_dataset['Idle'].median(), inplace=True)
-train_dataset['Post_premium_commercial'].fillna(train_dataset['Post_premium_commercial'].median(), inplace=True)
-train_dataset['Premium_commercial_play'].fillna(train_dataset['Premium_commercial_play'].median(), inplace=True)
-train_dataset['Size_variations'].fillna(train_dataset['Size_variations'].median(), inplace=True)
-train_dataset['Color_variations'].fillna(train_dataset['Color_variations'].median(), inplace=True)
-
-missing_values_count = (train_dataset.isnull().sum() * 100 / len(train_dataset))
-print("")
-print("displaying Na count for each feature after NA handling")
-print(missing_values_count)
+#handle na
+train_dataset = na_handling(train_dataset)
 
 # Data splitting
 # Let's say we want to split the data in 70:15:15 for train:valid:test dataset
@@ -522,13 +491,6 @@ print("")
 print("data splitting: 70% train, 15% validation 15% internal test")
 train_size = 0.7
 
-# droping because test is bad
-train_dataset = train_dataset.drop(columns="Mouse_activity_1")
-train_dataset = train_dataset.drop(columns="Mouse_activity_2")
-train_dataset = train_dataset.drop(columns="Mouse_activity_3")
-train_dataset = train_dataset.drop(columns="Location")
-train_dataset = train_dataset.drop(columns="month")
-train_dataset = train_dataset.drop(columns="Gender")
 
 feature_vector = train_dataset.drop(columns=['Buy_premium']).copy()
 target_variable = train_dataset['Buy_premium']
